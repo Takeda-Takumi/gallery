@@ -14,7 +14,13 @@ export class MediaFileService {
   ) {}
 
   public async findOneByMd5(md5: string): Promise<MediaFile> {
-    return this.mediaFileRepository.findOne({ where: { md5: md5 } });
+    if (md5 === undefined) {
+      throw Error('property md5 undefined');
+    }
+
+    return await this.mediaFileRepository.findOne({
+      where: { md5: md5 },
+    });
   }
 
   public async isExist(md5: string) {
