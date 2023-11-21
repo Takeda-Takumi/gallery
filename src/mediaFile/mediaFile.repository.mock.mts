@@ -10,6 +10,8 @@ export class MediaFileRepositoryMock {
     where: { md5: string };
   }): Promise<Image | null> {
     const ret = this.mediaFileRepositoryMock.find((value) => {
+      if (option.where.md5 === undefined) return true;
+
       return value.md5 === option.where.md5;
     });
     if (ret === undefined) return null;
