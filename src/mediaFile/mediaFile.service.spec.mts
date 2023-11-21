@@ -50,6 +50,19 @@ describe('MediafileService', () => {
     expect(result).not.toBeNull();
   });
 
+  test('findOne md5 empty', async () => {
+    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+    const result = await service.findOneByMd5('');
+    expect(result).toBeNull();
+  });
+
+  test('findOne md5 undefined', async () => {
+    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+    expect(service.findOneByMd5(undefined)).rejects.toThrow(
+      'property md5 undefined',
+    );
+  });
+
   test('findOne md5 none', async () => {
     const result = await service.findOneByMd5('test');
     expect(result).toBeNull();
