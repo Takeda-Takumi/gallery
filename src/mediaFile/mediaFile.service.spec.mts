@@ -50,7 +50,7 @@ describe('MediafileService', () => {
     expect(result).not.toBeNull();
   });
 
-  test("findOne md5 'test'", async () => {
+  test('findOne md5 none', async () => {
     const result = await service.findOneByMd5('test');
     expect(result).toBeNull();
   });
