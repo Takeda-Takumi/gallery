@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { FakeImage } from '../image/image.fake.mjs';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
 import { MediaFileService } from './mediaFile.service.mjs';
-import { Image } from '../image/image.interface.mjs';
 import { MediaFileRepositoryMock } from './mediaFile.repository.mock.mjs';
 
 describe('MediafileService', () => {
@@ -81,13 +80,13 @@ describe('MediafileService', () => {
   test('success insert', async () => {
     const fakeImage = new FakeImage('test', 'png', '');
     await expect(service.isExist(fakeImage.md5)).resolves.toBeFalsy();
-    const result = await service.insert(fakeImage);
+    await service.insert(fakeImage);
   });
 
   test('fail if same md5 exists', async () => {
     const fakeImage = new FakeImage('test', 'png', '');
     await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
     await expect(service.isExist('test')).resolves.toBeTruthy();
-    await expect(service.insert(fakeImage)).rejects.toThrowError('duplicate');
+    await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
   });
 });
