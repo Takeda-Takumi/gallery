@@ -24,4 +24,5 @@ import { MediaFileModule } from './mediaFile/mediaFile.module.mjs';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
+
