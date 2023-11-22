@@ -8,4 +8,4 @@ import { MediaFileService } from './mediaFile.service.mjs';
   exports: [TypeOrmModule, MediaFileService],
   providers: [MediaFileService],
 })
-export class MediaFileModule {}
+export class MediaFileModule { }
