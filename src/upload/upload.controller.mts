@@ -1,20 +1,17 @@
 import {
   Controller,
+  Get,
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
-  Req,
+  Body,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Express } from 'express';
-import * as crypto from 'node:crypto';
 import { MediaFile } from '../mediaFile/mediaFile.entity.mjs';
-import { Repository } from 'typeorm';
 import { MediaFileService } from '../mediaFile/mediaFile.service.mjs';
-import { Image } from '../image/image.interface.mjs';
 import { ImageUploadService } from '../image/uplaod/image.upload.service.mjs';
 
 @Controller('upload')

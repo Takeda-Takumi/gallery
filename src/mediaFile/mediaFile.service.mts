@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
-import * as crypto from 'node:crypto';
 import { fileTypeFromBuffer } from 'file-type';
 import { Image } from 'src/image/image.interface.mjs';
 
@@ -11,7 +10,7 @@ export class MediaFileService {
   constructor(
     @InjectRepository(MediaFile)
     private readonly mediaFileRepository: Repository<MediaFile>,
-  ) {}
+  ) { }
 
   public async findOneByMd5(md5: string): Promise<MediaFile> {
     if (md5 === undefined) {
