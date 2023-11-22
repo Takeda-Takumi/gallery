@@ -17,7 +17,7 @@ import { MediaFileModule } from './mediaFile/mediaFile.module.mjs';
       database: 'db/testdb.splite3',
       entities: [MediaFile],
       synchronize: true,
-      logging: true,
+      logging: 'all',
       logger: 'file',
     }),
   ],
