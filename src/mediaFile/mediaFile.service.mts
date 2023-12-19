@@ -21,19 +21,10 @@ export class MediaFileService {
   }
 
   public async isExist(md5: string) {
-    // const result = await this.findOneByMd5(md5);
-    // console.log(result);
-    // const ret = !!result;
-    // console.log(ret);
-    // return ret;
     return Boolean(await this.findOneByMd5(md5));
   }
 
   public async insert(mediaFile: MediaFile) {
-    // const md5hash = crypto.createHash('md5');
-    // const md5 = md5hash.update(file).digest('hex');
-    // const extension = await this.detectFileType(file);
-
     if (await this.isExist(mediaFile.md5)) {
       throw new Error('duplicate');
     }
