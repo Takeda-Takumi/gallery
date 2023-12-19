@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
-import { fileTypeFromBuffer } from 'file-type';
 
 @Injectable()
 export class MediaFileService {
@@ -45,18 +44,5 @@ export class MediaFileService {
     });
 
     await this.mediaFileRepository.insert(newMediaFile);
-  }
-
-  private async detectFileType(file: Buffer): Promise<string> {
-    const expectedFileType = ['jpg', 'png'];
-    const fileTypeResult = await fileTypeFromBuffer(file);
-    if (fileTypeResult === undefined) {
-      throw new Error();
-    }
-
-    if (!expectedFileType.includes(fileTypeResult.ext)) {
-      throw new Error('not image file');
-    }
-    return fileTypeResult.ext;
   }
 }
