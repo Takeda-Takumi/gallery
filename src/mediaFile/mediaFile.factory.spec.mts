@@ -24,6 +24,6 @@ describe('MediaFileFactory', () => {
 
   test('throw Error if load text file not jpg, png', async () => {
     const textfile = await fs.readFile('test/files/textfile.txt');
-    await expect(mediaFileFactory.parse(textfile)).rejects.toThrowError();
+    await expect(mediaFileFactory.parse(textfile)).rejects.toThrow();
   });
 });

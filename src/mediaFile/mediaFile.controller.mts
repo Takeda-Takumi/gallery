@@ -1,10 +1,8 @@
 import {
   Controller,
-  Get,
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
-  Body,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
