@@ -11,4 +11,9 @@ export class MediaFile {
 
   @Column()
   extension: string;
+
+  constructor(md5, extension) {
+    this.md5 = md5;
+    this.extension = extension;
+  }
 }

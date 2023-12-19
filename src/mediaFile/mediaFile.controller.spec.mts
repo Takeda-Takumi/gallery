@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UploadController } from './upload.controller.mjs';
+import { MediaFileController } from './mediaFile.controller.mjs';
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { MediaFile } from '../mediaFile/mediaFile.entity.mjs';
-import { MediaFileService } from '../mediaFile/mediaFile.service.mjs';
 import { MediaFileRepositoryMock } from '../mediaFile/mediaFile.repository.mock.mjs';
-import { ImageUploadService } from '../image/uplaod/image.upload.service.mjs';
+import { MediaFileService } from '../mediaFile/mediaFile.service.mjs';
+import { MediaFileFactory } from '../mediaFile/mediaFile.factory.mjs';
 
-describe('UploadController', () => {
-  let controller: UploadController;
+describe('MediaFileController', () => {
+  let controller: MediaFileController;
   let app: INestApplication;
 
   const testFileDir = 'test/files';
@@ -19,10 +19,10 @@ describe('UploadController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UploadController],
+      controllers: [MediaFileController],
       providers: [
         MediaFileService,
-        ImageUploadService,
+        MediaFileFactory,
         {
           provide: getRepositoryToken(MediaFile),
           useClass: MediaFileRepositoryMock,
@@ -31,7 +31,7 @@ describe('UploadController', () => {
     }).compile();
 
     app = module.createNestApplication();
-    controller = module.get<UploadController>(UploadController);
+    controller = module.get<MediaFileController>(MediaFileController);
 
     await app.init();
   });

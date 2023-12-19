@@ -1,25 +1,22 @@
 import {
   Controller,
-  Get,
   MaxFileSizeValidator,
   ParseFilePipe,
   Post,
-  Body,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
-import { MediaFile } from '../mediaFile/mediaFile.entity.mjs';
 import { MediaFileService } from '../mediaFile/mediaFile.service.mjs';
-import { ImageUploadService } from '../image/uplaod/image.upload.service.mjs';
+import { MediaFileFactory } from '../mediaFile/mediaFile.factory.mjs';
 
 @Controller('upload')
-export class UploadController {
+export class MediaFileController {
   constructor(
     private mediaFileService: MediaFileService,
-    private imageUploadService: ImageUploadService,
-  ) {}
+    private mediaFileFactory: MediaFileFactory,
+  ) { }
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
@@ -31,7 +28,7 @@ export class UploadController {
     )
     file: Express.Multer.File,
   ) {
-    const uploadImage = await this.imageUploadService.parse(file.buffer);
-    this.mediaFileService.insert(uploadImage);
+    const mediaFile = await this.mediaFileFactory.parse(file.buffer);
+    this.mediaFileService.insert(mediaFile);
   }
 }
