@@ -11,18 +11,6 @@ describe('MediafileService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        // TypeOrmModule.forRoot({
-        //   type: 'sqlite',
-        //   database: ':memory:',
-        //   entities: [MediaFile],
-        //   logging: true,
-        //   logger: 'file',
-        //   synchronize: true,
-        //   // dropSchema: true,
-        // }),
-        // TypeOrmModule.forFeature([MediaFile]),
-      ],
       providers: [
         MediaFileService,
         {
