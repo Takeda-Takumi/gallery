@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
 import { fileTypeFromBuffer } from 'file-type';
-import { Image } from 'src/image/image.interface.mjs';
 
 @Injectable()
 export class MediaFileService {
@@ -31,21 +30,21 @@ export class MediaFileService {
     return Boolean(await this.findOneByMd5(md5));
   }
 
-  public async insert(image: Image) {
+  public async insert(mediaFile: MediaFile) {
     // const md5hash = crypto.createHash('md5');
     // const md5 = md5hash.update(file).digest('hex');
     // const extension = await this.detectFileType(file);
 
-    if (await this.isExist(image.md5)) {
+    if (await this.isExist(mediaFile.md5)) {
       throw new Error('duplicate');
     }
 
-    const mediaFile = this.mediaFileRepository.create({
-      md5: image.md5,
-      extension: image.extension,
+    const newMediaFile = this.mediaFileRepository.create({
+      md5: mediaFile.md5,
+      extension: mediaFile.extension,
     });
 
-    await this.mediaFileRepository.insert(mediaFile);
+    await this.mediaFileRepository.insert(newMediaFile);
   }
 
   private async detectFileType(file: Buffer): Promise<string> {
