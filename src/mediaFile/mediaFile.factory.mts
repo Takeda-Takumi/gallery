@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { ImageUpload } from './image.upload.class.mjs';
+import { MediaFile } from './mediaFile.entity.mjs';
 import crypto from 'node:crypto';
 import { fileTypeFromBuffer } from 'file-type';
 
 @Injectable()
-export class ImageUploadService {
-  public async parse(file: Buffer): Promise<ImageUpload> {
+export class MediaFileFactory {
+  public async parse(file: Buffer): Promise<MediaFile> {
     const md5 = this.generateMd5(file);
     const extension = await this.detectFileType(file);
-    return new ImageUpload(md5, extension, file);
+    return new MediaFile(md5, extension);
   }
 
   private generateMd5(file: Buffer): string {

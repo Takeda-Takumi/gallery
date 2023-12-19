@@ -1,14 +1,14 @@
-import { Image } from '../image/image.interface.mjs';
+import { MediaFile } from './mediaFile.entity.mjs';
 export class MediaFileRepositoryMock {
-  private mediaFileRepositoryMock: Image[] = [];
+  private mediaFileRepositoryMock: MediaFile[] = [];
 
-  public async insert(image: Image): Promise<void> {
+  public async insert(image: MediaFile): Promise<void> {
     this.mediaFileRepositoryMock.push(image);
   }
 
   public async findOne(option: {
     where: { md5: string };
-  }): Promise<Image | null> {
+  }): Promise<MediaFile | null> {
     const ret = this.mediaFileRepositoryMock.find((value) => {
       if (option.where.md5 === undefined) return true;
 
@@ -17,7 +17,7 @@ export class MediaFileRepositoryMock {
     if (ret === undefined) return null;
     return ret;
   }
-  public async create(image: Partial<Image>): Promise<Partial<Image>> {
+  public async create(image: Partial<MediaFile>): Promise<Partial<MediaFile>> {
     return { md5: image.md5, extension: image.extension };
   }
 
