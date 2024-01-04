@@ -1,6 +1,8 @@
 import {
   Controller,
+  Get,
   MaxFileSizeValidator,
+  Param,
   ParseFilePipe,
   Post,
   UploadedFile,
@@ -10,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { MediaFileService } from '../mediaFile/mediaFile.service.mjs';
 import { MediaFileFactory } from '../mediaFile/mediaFile.factory.mjs';
+import { MediaFile } from './mediaFile.entity.mjs';
 
 @Controller('image')
 export class MediaFileController {
@@ -31,5 +34,9 @@ export class MediaFileController {
     const mediaFile = await this.mediaFileFactory.parse(file.buffer);
     this.mediaFileService.insert(mediaFile);
   }
-}
 
+  @Get(':md5')
+  public async findOne(@Param('md5') md5: string): Promise<MediaFile> {
+    return this.mediaFileService.findOneByMd5(md5);
+  }
+}
