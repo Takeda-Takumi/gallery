@@ -11,16 +11,16 @@ import { Express } from 'express';
 import { MediaFileService } from '../mediaFile/mediaFile.service.mjs';
 import { MediaFileFactory } from '../mediaFile/mediaFile.factory.mjs';
 
-@Controller('upload')
+@Controller('image')
 export class MediaFileController {
   constructor(
     private mediaFileService: MediaFileService,
     private mediaFileFactory: MediaFileFactory,
   ) { }
 
-  @Post()
+  @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  public async uploadFile(
+  public async uploadImage(
     @UploadedFile(
       new ParseFilePipe({
         validators: [new MaxFileSizeValidator({ maxSize: 30 * 1024 * 1024 })],
@@ -32,3 +32,4 @@ export class MediaFileController {
     this.mediaFileService.insert(mediaFile);
   }
 }
+
