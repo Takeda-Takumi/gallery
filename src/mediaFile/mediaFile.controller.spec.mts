@@ -40,23 +40,23 @@ describe('MediaFileController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('/upload 1', async () => {
+  it('/image/upload 1', async () => {
     const result = await request(app.getHttpServer())
-      .post('/upload')
+      .post('/image/upload')
       .attach('file', `${testFileDir}/${testFileName}`);
     expect(result.status).toBe(201);
   });
 
-  it('/upload 2', async () => {
+  it('/image/upload 2', async () => {
     const result = await request(app.getHttpServer())
-      .post('/upload')
+      .post('/image/upload')
       .attach('file', `${testFileDir}/${testFileNameSame}`);
     expect(result.status).toBe(201);
   });
 
-  it('/upload 3', async () => {
+  it('/image/upload 3', async () => {
     const result = await request(app.getHttpServer())
-      .post('/upload')
+      .post('/image/upload')
       .attach('file', `${testFileDir}/${testFileNameCompression}`);
     expect(result.status).toBe(201);
   });
