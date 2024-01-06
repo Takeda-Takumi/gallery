@@ -10,17 +10,20 @@ export class MediaFileService {
     private readonly mediaFileRepository: Repository<MediaFile>,
   ) {}
 
-  public async findOne(
-    md5: string = undefined,
-    id: number = undefined,
-  ): Promise<MediaFile> {
+  public async findOne({
+    md5 = undefined,
+    id = undefined,
+  }: {
+    md5?: string;
+    id?: number;
+  }): Promise<MediaFile> {
     return await this.mediaFileRepository.findOne({
       where: { md5: md5, id: id },
     });
   }
 
   public async isExist(md5: string) {
-    return Boolean(await this.findOne((md5 = md5)));
+    return Boolean(await this.findOne({ md5: md5 }));
   }
 
   public async insert(mediaFile: MediaFile) {
