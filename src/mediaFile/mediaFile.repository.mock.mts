@@ -6,13 +6,16 @@ export class MediaFileRepositoryMock {
     this.mediaFileRepositoryMock.push(image);
   }
 
-  public async findOne(option: {
-    where: { md5: string };
+  public async findOne({
+    where: { md5 = undefined, id = undefined },
+  }: {
+    where: { md5?: string; id?: number };
   }): Promise<MediaFile | null> {
     const ret = this.mediaFileRepositoryMock.find((value) => {
-      if (option.where.md5 === undefined) return true;
-
-      return value.md5 === option.where.md5;
+      return (
+        (typeof md5 === 'undefined' || value.md5 === md5) &&
+        (typeof id === 'undefined' || value.id === id)
+      );
     });
     if (ret === undefined) return null;
     return ret;
