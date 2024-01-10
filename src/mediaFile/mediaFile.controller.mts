@@ -35,8 +35,8 @@ export class MediaFileController {
     this.mediaFileService.insert(mediaFile);
   }
 
-  @Get(':md5')
-  public async findOne(@Param('md5') md5: string): Promise<MediaFile> {
-    return this.mediaFileService.findOneByMd5(md5);
+  @Get(':id')
+  public async findOneById(@Param('id') id: number): Promise<MediaFile> {
+    return this.mediaFileService.findOne({ id: id });
   }
 }
