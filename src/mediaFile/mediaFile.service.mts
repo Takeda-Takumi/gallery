@@ -24,12 +24,15 @@ export class MediaFileService {
     });
   }
 
-  public async isExist(md5: string) {
-    return Boolean(await this.findOne({ md5: md5 }));
+  public async isExist({
+    md5 = undefined,
+    id = undefined,
+  }: Options): Promise<boolean> {
+    return Boolean(await this.findOne({ md5: md5, id: id }));
   }
 
   public async insert(mediaFile: MediaFile) {
-    if (await this.isExist(mediaFile.md5)) {
+    if (await this.isExist({ md5: mediaFile.md5 })) {
       throw new Error('duplicate');
     }
 
