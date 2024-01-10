@@ -43,4 +43,12 @@ export class MediaFileService {
 
     await this.mediaFileRepository.insert(newMediaFile);
   }
+
+  public async remove(id: number) {
+    if (await !this.isExist({ id: id })) throw new Error();
+
+    const removed = await this.findOne({ id: id });
+    await this.mediaFileRepository.remove(removed);
+    return;
+  }
 }
