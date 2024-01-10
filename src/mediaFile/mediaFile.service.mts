@@ -3,31 +3,36 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
 
+type Options = {
+  md5?: string;
+  id?: number;
+};
+
 @Injectable()
 export class MediaFileService {
   constructor(
     @InjectRepository(MediaFile)
     private readonly mediaFileRepository: Repository<MediaFile>,
-  ) {}
+  ) { }
 
   public async findOne({
     md5 = undefined,
     id = undefined,
-  }: {
-    md5?: string;
-    id?: number;
-  }): Promise<MediaFile> {
+  }: Options): Promise<MediaFile> {
     return await this.mediaFileRepository.findOne({
       where: { md5: md5, id: id },
     });
   }
 
-  public async isExist(md5: string) {
-    return Boolean(await this.findOne({ md5: md5 }));
+  public async isExist({
+    md5 = undefined,
+    id = undefined,
+  }: Options): Promise<boolean> {
+    return Boolean(await this.findOne({ md5: md5, id: id }));
   }
 
   public async insert(mediaFile: MediaFile) {
-    if (await this.isExist(mediaFile.md5)) {
+    if (await this.isExist({ md5: mediaFile.md5 })) {
       throw new Error('duplicate');
     }
 
@@ -37,5 +42,13 @@ export class MediaFileService {
     });
 
     await this.mediaFileRepository.insert(newMediaFile);
+  }
+
+  public async remove(id: number) {
+    if (await !this.isExist({ id: id })) throw new Error();
+
+    const removed = await this.findOne({ id: id });
+    await this.mediaFileRepository.remove(removed);
+    return;
   }
 }

@@ -84,4 +84,15 @@ describe('MediaFileController', () => {
     expect(result.status).toBe(200);
     expect(result.body).toBeNull;
   });
+
+  test('delete media file', async () => {
+    const id = 0;
+    const data = { id: id, extension: 'png' };
+    await mediaFileRepositoryMock.insert(data);
+
+    const result = await request(app.getHttpServer()).delete(
+      '/image/remove/' + id,
+    );
+    expect(result.status).toBe(200);
+  });
 });
