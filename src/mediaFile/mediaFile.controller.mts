@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   MaxFileSizeValidator,
   Param,
@@ -41,5 +42,11 @@ export class MediaFileController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<MediaFile> {
     return this.mediaFileService.findOne({ id: id });
+  }
+
+  @Delete('remove/:id')
+  public async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    this.mediaFileService.remove(id);
+    return;
   }
 }
