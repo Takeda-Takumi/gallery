@@ -66,21 +66,21 @@ describe('MediaFileController', () => {
     expect(result.status).toBe(201);
   });
 
-  test('GET /image/md5', async () => {
-    const md5 = 'md5';
-    const data = { md5: md5, extension: 'png' };
+  test('GET /image/id', async () => {
+    const id = 0;
+    const data = { id: id };
     await mediaFileRepositoryMock.insert(data);
 
-    const result = await request(app.getHttpServer()).get('/image/' + md5);
+    const result = await request(app.getHttpServer()).get('/image/' + id);
     expect(result.status).toBe(200);
     expect(result.body).toStrictEqual(data);
   });
 
-  test('GET /image/md5', async () => {
-    const data = { md5: 'dummy', extension: 'dummy' };
+  test('GET /image/id none', async () => {
+    const data = { id: 0, extension: 'dummy' };
     await mediaFileRepositoryMock.insert(data);
 
-    const result = await request(app.getHttpServer()).get('/image/' + 'none');
+    const result = await request(app.getHttpServer()).get('/image/' + 1);
     expect(result.status).toBe(200);
     expect(result.body).toBeNull;
   });

@@ -8,20 +8,22 @@ export class MediaFileService {
   constructor(
     @InjectRepository(MediaFile)
     private readonly mediaFileRepository: Repository<MediaFile>,
-  ) { }
+  ) {}
 
-  public async findOneByMd5(md5: string): Promise<MediaFile> {
-    if (md5 === undefined) {
-      throw Error('property md5 undefined');
-    }
-
+  public async findOne({
+    md5 = undefined,
+    id = undefined,
+  }: {
+    md5?: string;
+    id?: number;
+  }): Promise<MediaFile> {
     return await this.mediaFileRepository.findOne({
-      where: { md5: md5 },
+      where: { md5: md5, id: id },
     });
   }
 
   public async isExist(md5: string) {
-    return Boolean(await this.findOneByMd5(md5));
+    return Boolean(await this.findOne({ md5: md5 }));
   }
 
   public async insert(mediaFile: MediaFile) {
