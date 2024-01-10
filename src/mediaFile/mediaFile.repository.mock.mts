@@ -11,14 +11,14 @@ export class MediaFileRepositoryMock {
   }: {
     where: { md5?: string; id?: number };
   }): Promise<MediaFile | null> {
-    const ret = this.mediaFileRepositoryMock.find((value) => {
+    const result = this.mediaFileRepositoryMock.find((value) => {
       return (
         (typeof md5 === 'undefined' || value.md5 === md5) &&
         (typeof id === 'undefined' || value.id === id)
       );
     });
-    if (ret === undefined) return null;
-    return ret;
+    if (typeof result === 'undefined') return null;
+    return result;
   }
   public async create(image: Partial<MediaFile>): Promise<Partial<MediaFile>> {
     return { md5: image.md5, extension: image.extension };
