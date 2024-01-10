@@ -4,6 +4,7 @@ import {
   MaxFileSizeValidator,
   Param,
   ParseFilePipe,
+  ParseIntPipe,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -36,7 +37,9 @@ export class MediaFileController {
   }
 
   @Get(':id')
-  public async findOneById(@Param('id') id: number): Promise<MediaFile> {
+  public async findOneById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<MediaFile> {
     return this.mediaFileService.findOne({ id: id });
   }
 }
