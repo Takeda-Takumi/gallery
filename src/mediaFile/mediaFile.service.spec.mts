@@ -51,6 +51,33 @@ describe('MediafileService', () => {
     expect(service.findOne({ md5: undefined })).resolves.toStrictEqual(data1);
   });
 
+  test('find one by id', async () => {
+    const data1 = { md5: 'test1', extension: 'png', id: 0 };
+    const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+    await mediaFileRepository.insert(data1);
+    await mediaFileRepository.insert(data2);
+    expect(service.findOne({ id: 1 })).resolves.toStrictEqual(data2);
+  });
+
+  test("id which dosen't exist returns null", async () => {
+    const data1 = { md5: 'test1', extension: 'png', id: 0 };
+    const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+    await mediaFileRepository.insert(data1);
+    await mediaFileRepository.insert(data2);
+    expect(service.findOne({ id: 2 })).resolves.toBeNull();
+  });
+
+  test("md5 and id exist but data dosen't exist ", async () => {
+    const data1 = { md5: 'test1', extension: 'png', id: 0 };
+    const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+    await mediaFileRepository.insert(data1);
+    await mediaFileRepository.insert(data2);
+    expect(service.findOne({ md5: 'test1', id: 1 })).resolves.toBeNull();
+  });
+
   test('findOne md5 none', async () => {
     const result = await service.findOne({ md5: 'test' });
     expect(result).toBeNull();
