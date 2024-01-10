@@ -85,24 +85,24 @@ describe('MediafileService', () => {
 
   test('exist md5 "test"', async () => {
     await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    await expect(service.isExist('test')).resolves.toBeTruthy();
+    await expect(service.isExist({ md5: 'test' })).resolves.toBeTruthy();
   });
 
   test('not exist md5 "notExist"', async () => {
     await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    await expect(service.isExist('notExist')).resolves.toBeFalsy();
+    await expect(service.isExist({ md5: 'notExist' })).resolves.toBeFalsy();
   });
 
   test('success insert', async () => {
     const fakeImage = new MediaFile('test', 'png');
-    await expect(service.isExist(fakeImage.md5)).resolves.toBeFalsy();
+    await expect(service.isExist({ md5: fakeImage.md5 })).resolves.toBeFalsy();
     await service.insert(fakeImage);
   });
 
   test('fail if same md5 exists', async () => {
     const fakeImage = new MediaFile('test', 'png');
     await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    await expect(service.isExist('test')).resolves.toBeTruthy();
+    await expect(service.isExist({ md5: 'test' })).resolves.toBeTruthy();
     await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
   });
 });
