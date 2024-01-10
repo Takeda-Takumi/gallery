@@ -105,4 +105,26 @@ describe('MediafileService', () => {
     await expect(service.isExist({ md5: 'test' })).resolves.toBeTruthy();
     await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
   });
+
+  test('remove media file by id', async () => {
+    const data1 = { id: 0, md5: 'data1' };
+    const data2 = { id: 1, md5: 'data2' };
+    await mediaFileRepository.insert(data1);
+    await mediaFileRepository.insert(data2);
+
+    await service.remove(0);
+    expect(
+      mediaFileRepository.findOne({ where: { md5: 'data1' } }),
+    ).resolves.toBeNull();
+    expect(
+      mediaFileRepository.findOne({ where: { md5: 'data2' } }),
+    ).resolves.toStrictEqual(data2);
+  });
+
+  test('removing media file which dose not exist is invalid', async () => {
+    const data1 = { id: 0, md5: 'data1' };
+    await mediaFileRepository.insert(data1);
+
+    expect(service.remove(1)).rejects.toThrow();
+  });
 });
