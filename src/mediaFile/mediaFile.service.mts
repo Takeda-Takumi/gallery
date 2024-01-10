@@ -13,7 +13,7 @@ export class MediaFileService {
   constructor(
     @InjectRepository(MediaFile)
     private readonly mediaFileRepository: Repository<MediaFile>,
-  ) {}
+  ) { }
 
   public async findOne({
     md5 = undefined,
