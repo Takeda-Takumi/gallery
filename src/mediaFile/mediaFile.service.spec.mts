@@ -32,25 +32,27 @@ describe('MediafileService', () => {
 
   test("findOne md5 'test'", async () => {
     await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    const result = await service.findOneByMd5('test');
+    const result = await service.findOne({ md5: 'test' });
     expect(result).not.toBeNull();
   });
 
   test('findOne md5 empty', async () => {
     await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    const result = await service.findOneByMd5('');
+    const result = await service.findOne({ md5: '' });
     expect(result).toBeNull();
   });
 
-  test('findOne md5 undefined', async () => {
-    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    expect(service.findOneByMd5(undefined)).rejects.toThrow(
-      'property md5 undefined',
-    );
+  test('parameter md5 which is undefined return first element', async () => {
+    const data1 = { md5: 'test1', extension: 'png' };
+    const data2 = { md5: 'test2', extension: 'png' };
+
+    await mediaFileRepository.insert(data1);
+    await mediaFileRepository.insert(data2);
+    expect(service.findOne({ md5: undefined })).resolves.toStrictEqual(data1);
   });
 
   test('findOne md5 none', async () => {
-    const result = await service.findOneByMd5('test');
+    const result = await service.findOne({ md5: 'test' });
     expect(result).toBeNull();
   });
 
