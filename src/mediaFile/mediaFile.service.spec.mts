@@ -30,101 +30,115 @@ describe('MediafileService', () => {
     expect(service).toBeDefined();
   });
 
-  test("findOne md5 'test'", async () => {
-    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    const result = await service.findOne({ md5: 'test' });
-    expect(result).not.toBeNull();
+  describe('findOne', () => {
+    describe('md5', () => {
+      test("findOne md5 'test'", async () => {
+        await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+        const result = await service.findOne({ md5: 'test' });
+        expect(result).not.toBeNull();
+      });
+
+      test('findOne md5 empty', async () => {
+        await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+        const result = await service.findOne({ md5: '' });
+        expect(result).toBeNull();
+      });
+
+      test('parameter md5 which is undefined return first element', async () => {
+        const data1 = { md5: 'test1', extension: 'png' };
+        const data2 = { md5: 'test2', extension: 'png' };
+
+        await mediaFileRepository.insert(data1);
+        await mediaFileRepository.insert(data2);
+        expect(service.findOne({ md5: undefined })).resolves.toStrictEqual(
+          data1,
+        );
+      });
+
+      test('findOne md5 none', async () => {
+        const result = await service.findOne({ md5: 'test' });
+        expect(result).toBeNull();
+      });
+    });
+
+    describe('id', () => {
+      test('find one by id', async () => {
+        const data1 = { md5: 'test1', extension: 'png', id: 0 };
+        const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+        await mediaFileRepository.insert(data1);
+        await mediaFileRepository.insert(data2);
+        expect(service.findOne({ id: 1 })).resolves.toStrictEqual(data2);
+      });
+
+      test("id which dosen't exist returns null", async () => {
+        const data1 = { md5: 'test1', extension: 'png', id: 0 };
+        const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+        await mediaFileRepository.insert(data1);
+        await mediaFileRepository.insert(data2);
+        expect(service.findOne({ id: 2 })).resolves.toBeNull();
+      });
+    });
+
+    test("md5 and id exist but data dosen't exist ", async () => {
+      const data1 = { md5: 'test1', extension: 'png', id: 0 };
+      const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+      await mediaFileRepository.insert(data1);
+      await mediaFileRepository.insert(data2);
+      expect(service.findOne({ md5: 'test1', id: 1 })).resolves.toBeNull();
+    });
   });
 
-  test('findOne md5 empty', async () => {
-    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    const result = await service.findOne({ md5: '' });
-    expect(result).toBeNull();
+  describe('exist', () => {
+    test('exist md5 "test"', async () => {
+      await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+      await expect(service.exists({ md5: 'test' })).resolves.toBeTruthy();
+    });
+
+    test('not exist md5 "notExist"', async () => {
+      await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+      await expect(service.exists({ md5: 'notExist' })).resolves.toBeFalsy();
+    });
   });
 
-  test('parameter md5 which is undefined return first element', async () => {
-    const data1 = { md5: 'test1', extension: 'png' };
-    const data2 = { md5: 'test2', extension: 'png' };
+  describe('insert', () => {
+    test('success insert', async () => {
+      const fakeImage = new MediaFile('test', 'png');
+      await expect(service.exists({ md5: fakeImage.md5 })).resolves.toBeFalsy();
+      await service.insert(fakeImage);
+    });
 
-    await mediaFileRepository.insert(data1);
-    await mediaFileRepository.insert(data2);
-    expect(service.findOne({ md5: undefined })).resolves.toStrictEqual(data1);
+    test('fail if same md5 exists', async () => {
+      const fakeImage = new MediaFile('test', 'png');
+      await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+      await expect(service.exists({ md5: 'test' })).resolves.toBeTruthy();
+      await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
+    });
   });
 
-  test('find one by id', async () => {
-    const data1 = { md5: 'test1', extension: 'png', id: 0 };
-    const data2 = { md5: 'test2', extension: 'png', id: 1 };
+  describe('remove', () => {
+    test('remove media file by id', async () => {
+      const data1 = { id: 0, md5: 'data1' };
+      const data2 = { id: 1, md5: 'data2' };
+      await mediaFileRepository.insert(data1);
+      await mediaFileRepository.insert(data2);
 
-    await mediaFileRepository.insert(data1);
-    await mediaFileRepository.insert(data2);
-    expect(service.findOne({ id: 1 })).resolves.toStrictEqual(data2);
-  });
+      await service.remove(0);
+      expect(
+        mediaFileRepository.findOne({ where: { md5: 'data1' } }),
+      ).resolves.toBeNull();
+      expect(
+        mediaFileRepository.findOne({ where: { md5: 'data2' } }),
+      ).resolves.toStrictEqual(data2);
+    });
 
-  test("id which dosen't exist returns null", async () => {
-    const data1 = { md5: 'test1', extension: 'png', id: 0 };
-    const data2 = { md5: 'test2', extension: 'png', id: 1 };
+    test('removing media file which dose not exist is invalid', async () => {
+      const data1 = { id: 0, md5: 'data1' };
+      await mediaFileRepository.insert(data1);
 
-    await mediaFileRepository.insert(data1);
-    await mediaFileRepository.insert(data2);
-    expect(service.findOne({ id: 2 })).resolves.toBeNull();
-  });
-
-  test("md5 and id exist but data dosen't exist ", async () => {
-    const data1 = { md5: 'test1', extension: 'png', id: 0 };
-    const data2 = { md5: 'test2', extension: 'png', id: 1 };
-
-    await mediaFileRepository.insert(data1);
-    await mediaFileRepository.insert(data2);
-    expect(service.findOne({ md5: 'test1', id: 1 })).resolves.toBeNull();
-  });
-
-  test('findOne md5 none', async () => {
-    const result = await service.findOne({ md5: 'test' });
-    expect(result).toBeNull();
-  });
-
-  test('exist md5 "test"', async () => {
-    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    await expect(service.isExist({ md5: 'test' })).resolves.toBeTruthy();
-  });
-
-  test('not exist md5 "notExist"', async () => {
-    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    await expect(service.isExist({ md5: 'notExist' })).resolves.toBeFalsy();
-  });
-
-  test('success insert', async () => {
-    const fakeImage = new MediaFile('test', 'png');
-    await expect(service.isExist({ md5: fakeImage.md5 })).resolves.toBeFalsy();
-    await service.insert(fakeImage);
-  });
-
-  test('fail if same md5 exists', async () => {
-    const fakeImage = new MediaFile('test', 'png');
-    await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-    await expect(service.isExist({ md5: 'test' })).resolves.toBeTruthy();
-    await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
-  });
-
-  test('remove media file by id', async () => {
-    const data1 = { id: 0, md5: 'data1' };
-    const data2 = { id: 1, md5: 'data2' };
-    await mediaFileRepository.insert(data1);
-    await mediaFileRepository.insert(data2);
-
-    await service.remove(0);
-    expect(
-      mediaFileRepository.findOne({ where: { md5: 'data1' } }),
-    ).resolves.toBeNull();
-    expect(
-      mediaFileRepository.findOne({ where: { md5: 'data2' } }),
-    ).resolves.toStrictEqual(data2);
-  });
-
-  test('removing media file which dose not exist is invalid', async () => {
-    const data1 = { id: 0, md5: 'data1' };
-    await mediaFileRepository.insert(data1);
-
-    expect(service.remove(1)).rejects.toThrow();
+      expect(service.remove(1)).rejects.toThrow();
+    });
   });
 });

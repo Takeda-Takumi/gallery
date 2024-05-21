@@ -24,7 +24,7 @@ export class MediaFileService {
     });
   }
 
-  public async isExist({
+  public async exists({
     md5 = undefined,
     id = undefined,
   }: Options): Promise<boolean> {
@@ -32,7 +32,7 @@ export class MediaFileService {
   }
 
   public async insert(mediaFile: MediaFile) {
-    if (await this.isExist({ md5: mediaFile.md5 })) {
+    if (await this.exists({ md5: mediaFile.md5 })) {
       throw new Error('duplicate');
     }
 
@@ -45,7 +45,7 @@ export class MediaFileService {
   }
 
   public async remove(id: number) {
-    if (await !this.isExist({ id: id })) throw new Error();
+    if (!(await this.exists({ id: id }))) throw new Error();
 
     const removed = await this.findOne({ id: id });
     await this.mediaFileRepository.remove(removed);
