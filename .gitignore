@@ -2,7 +2,8 @@
 /dist
 /node_modules
 /uploads
-db/testdb.sqlite3
+/db/test.sqlite3
+/db/production.sqlite3
 
 # Logs
 logs
