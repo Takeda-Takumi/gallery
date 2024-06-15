@@ -8,7 +8,7 @@ export class MediaFileFactory {
   public async parse(file: Buffer): Promise<MediaFile> {
     const md5 = this.generateMd5(file);
     const extension = await this.detectFileType(file);
-    return new MediaFile(md5, extension);
+    return new MediaFile(null, md5, extension);
   }
 
   private generateMd5(file: Buffer): string {

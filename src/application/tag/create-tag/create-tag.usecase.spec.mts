@@ -8,15 +8,15 @@ import { Tag } from '../../../domain/tag/tag.entity.mjs';
 import { TagService } from '../../../domain/tag/tag.service.mjs';
 import { TypeOrmTagRepository } from '../../../infrastructure/sql/tag.repository.typeorm.mjs';
 import { CreateTagUseCase } from './create-tag.usecase.mjs';
-import { TagFactory } from '../../../infrastructure/uuid/tag.factory.mjs';
 import { TagRepositoryToken } from '../../../domain/tag/tag.repository.interface.mjs';
+import { TagTestFixture } from '../../../domain/tag/tag.test-fixture.mjs';
 
 
 describe('CreateTagUseCase', () => {
   let tagRepository: Repository<Tag>
   let mediaFileRepository: Repository<MediaFile>
   let dataSource: DataSource
-  const tagFactory = new TagFactory()
+  const tagTestFixture: TagTestFixture = new TagTestFixture()
   let usecase: CreateTagUseCase
 
   beforeEach(async () => {
@@ -51,7 +51,7 @@ describe('CreateTagUseCase', () => {
   });
 
   test.skip('fdsa', async () => {
-    const tag = tagFactory.create('test')
+    const tag = tagTestFixture.tagForTest()
     expect(await usecase.handle({ name: tag.name.name })).toBe({ id: tag.id.id, name: tag.name.name })
   })
 })
