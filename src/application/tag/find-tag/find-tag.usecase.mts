@@ -5,7 +5,7 @@ import { TagService } from "../../../domain/tag/tag.service.mjs";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
-export class FindTagUseCase implements UseCase<FindTagUseCaseInputDto, FindTagUseCaseOutputDto | {}> {
+export class FindTagUseCase implements UseCase<FindTagUseCaseInputDto, FindTagUseCaseOutputDto | Record<string, never>> {
 
   constructor(
     private readonly tagService: TagService
