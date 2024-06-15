@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { CreateTagUseCaseInputDto, CreateTagUseCaseOutputDto } from "./create-tag.usecase.dto.mjs";
 import { UseCase } from "../../usacase.interface.mjs";
 import { TagName } from "../../../domain/tag/tagName.mjs";

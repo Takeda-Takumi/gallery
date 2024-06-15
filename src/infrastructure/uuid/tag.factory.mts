@@ -8,7 +8,9 @@ import { TagName } from "../../domain/tag/tagName.mjs";
 
 @Injectable()
 export class TagFactory {
-  constructor() { }
+  constructor() {
+    return
+  }
 
   private generateId(): TagId {
     return new TagId(uuidv4())

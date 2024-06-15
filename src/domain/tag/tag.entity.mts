@@ -4,7 +4,6 @@ import {
   JoinTable,
   ManyToMany,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import { TagName } from './tagName.mjs';

@@ -4,7 +4,7 @@ type PropertyNamesExcludeMethods<Base, FilterType> = {
   [Key in keyof Base]: Base[Key] extends FilterType ? never : Key
 }[keyof Base];
 
-type PropertyName = PropertyNamesExcludeMethods<Tag, Function>
+type PropertyName = PropertyNamesExcludeMethods<Tag, (...arg: any) => any>
 
 type TagColumn = {
   [K in PropertyName]: any
