@@ -105,13 +105,13 @@ describe('MediafileService', () => {
 
   describe('insert', () => {
     test('success insert', async () => {
-      const fakeImage = new MediaFile('test', 'png');
+      const fakeImage = new MediaFile(null, 'test', 'png');
       await expect(service.exists({ md5: fakeImage.md5 })).resolves.toBeFalsy();
       await service.insert(fakeImage);
     });
 
     test('fail if same md5 exists', async () => {
-      const fakeImage = new MediaFile('test', 'png');
+      const fakeImage = new MediaFile(null, 'test', 'png');
       await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
       await expect(service.exists({ md5: 'test' })).resolves.toBeTruthy();
       await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
