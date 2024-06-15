@@ -2,23 +2,16 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.mjs';
 import { AppService } from './app.service.mjs';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MediaFile } from './mediaFile/mediaFile.entity.mjs';
-import { MediaFileModule } from './mediaFile/mediaFile.module.mjs';
-import { Tag } from './tag/tag.entity.mjs';
-import { TagModule } from './tag/tag.module.mjs';
+import { MediaFileModule } from './domain/mediafile/mediaFile.module.mjs';
+import { TagModule } from './domain/tag/tag.module.mjs';
+import { MediaFile } from './domain/mediafile/mediaFile.entity.mjs';
+import { Tag } from './domain/tag/tag.entity.mjs';
+import { TagControllerModule } from './presentation/http/controllers/tag/tag.controller.module.mjs';
 
 @Module({
   imports: [
     MediaFileModule,
-    TagModule,
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db/production.splite3',
-      entities: [MediaFile, Tag],
-      synchronize: true,
-      logging: 'all',
-      logger: 'file',
-    }),
+    TagControllerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
