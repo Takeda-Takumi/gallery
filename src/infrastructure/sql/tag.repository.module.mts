@@ -15,7 +15,7 @@ export const TagRepositoryProvider: Provider = {
     TypeOrmModule.forFeature([Tag, MediaFile]),
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'db/production.splite3',
+      database: 'db/production.sqlite3',
       entities: [MediaFile, Tag],
       synchronize: true,
       logging: 'all',
