@@ -7,7 +7,7 @@ export const createTestConfigurationForSQLite = (
   entities: Entity[],
 ): TypeOrmModuleOptions => ({
   type: 'sqlite',
-  database: 'db/test.splite3',
+  database: 'db/test.sqlite3',
   entities,
   synchronize: true,
   logging: 'all',
