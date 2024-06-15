@@ -22,7 +22,8 @@ export class MediaFile {
   @ManyToMany(() => Tag, (tags) => tags.mediaFiles)
   tags: Tag[];
 
-  constructor(md5, extension) {
+  constructor(id: number, md5: string, extension: string) {
+    this.id = id
     this.md5 = md5;
     this.extension = extension;
   }
