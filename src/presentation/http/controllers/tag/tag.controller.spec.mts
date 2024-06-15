@@ -6,14 +6,9 @@ import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Tag } from '../../../../domain/tag/tag.entity.mjs';
 import { DataSource, Repository } from 'typeorm';
 import { MediaFile } from '../../../../domain/mediafile/mediaFile.entity.mjs';
-import { TagFactory } from '../../../../infrastructure/uuid/tag.factory.mjs';
 import { MediaFileModule } from '../../../../domain/mediafile/mediaFile.module.mjs';
-import { TagModule } from '../../../../domain/tag/tag.module.mjs';
 import { createTestConfigurationForSQLite } from '../../../../infrastructure/sql/configuration.database.integration.mjs';
-import { TagName } from '../../../../domain/tag/tagName.mjs';
-import { InMemoryTagRepository } from '../../../../infrastructure/in-memory/tag.repository.in-memory.mjs';
 import { TypeOrmTagRepository } from '../../../../infrastructure/sql/tag.repository.typeorm.mjs';
-import { TagUsecaseModule } from '../../../../application/tag/tag.usecase.module.mjs';
 import { TagService } from '../../../../domain/tag/tag.service.mjs';
 import { DeleteUseCase } from '../../../../application/tag/delete/delete.usecase.mjs';
 import { RemoveUseCase } from '../../../../application/tag/remove/remove.usecase.mjs';
@@ -22,6 +17,7 @@ import { CreateTagUseCase } from '../../../../application/tag/create-tag/create-
 import { FindTagUseCase } from '../../../../application/tag/find-tag/find-tag.usecase.mjs';
 import { ChangeTagNameUsecase } from '../../../../application/tag/change-tag-name/change-tag-name.usecase.mjs';
 import { TagRepositoryToken } from '../../../../domain/tag/tag.repository.interface.mjs';
+import { TagTestFixture } from '../../../../domain/tag/tag.test-fixture.mjs';
 
 
 describe('TagController', () => {
@@ -30,7 +26,7 @@ describe('TagController', () => {
   let tagRepository: Repository<Tag>
   let mediaFileRepository: Repository<MediaFile>
   let dataSource: DataSource
-  const tagFactory = new TagFactory()
+  const tagTestFixture: TagTestFixture = new TagTestFixture()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -80,7 +76,8 @@ describe('TagController', () => {
 
   describe('GET /tags/{id}', () => {
     test('存在しないidが指定された場合、空のオブジェクトを返す', async () => {
-      const tag = tagFactory.create('test')
+      const tag = tagTestFixture.tagForTest()
+
       expect(await tagRepository.exist({ where: { id: tag.id } })).toBeFalsy()
       const response = await request(app.getHttpServer()).get('/tags/' + tag.id.id)
       expect(response.status).toBe(200)
@@ -88,8 +85,8 @@ describe('TagController', () => {
     })
 
     test('成功', async () => {
-      const mediaFile = new MediaFile('md5', 'extension')
-      const tag = tagFactory.create('tag', [mediaFile])
+      const mediaFile = tagTestFixture.mediaFileForTest()
+      const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile] })
       await tagRepository.save(tag)
       const response = await request(app.getHttpServer()).get('/tags/' + tag.id.id)
       expect(response.status).toBe(200)
@@ -113,8 +110,8 @@ describe('TagController', () => {
   describe('PUT /tags/{id}', () => {
     describe('changeTagName', () => {
       test('成功', async () => {
-        const oldTag = tagFactory.create('oldTag')
-        const newTagName = new TagName('newTag')
+        const oldTag = tagTestFixture.tagForTest({ name: 'oldTag' })
+        const newTagName = tagTestFixture.tagForTest({ name: 'newTag' })
         await tagRepository.save(oldTag)
 
         const response = await request(app.getHttpServer()).put('/tags/' + oldTag.id.id).send({ name: newTagName.name })
@@ -127,8 +124,8 @@ describe('TagController', () => {
         )
       })
 
-      test.skip('同じ名前', async () => {
-        const oldTag = tagFactory.create('oldTag')
+      test('同じ名前', async () => {
+        const oldTag = tagTestFixture.tagForTest({ name: 'oldTag' })
         await tagRepository.save(oldTag)
         const response = await request(app.getHttpServer()).put('/tags/' + oldTag.id.id).send({ name: oldTag.name.name })
         expect(response.status).toBe(500)
@@ -139,8 +136,8 @@ describe('TagController', () => {
   describe('PUT /tags/{id}/mediafiles/{id}', () => {
     describe('assign', () => {
       test('成功', async () => {
-        const mediaFile = mediaFileRepository.create({ id: 1, md5: 'md5', extension: 'ext' })
-        const tag = tagFactory.create('tag')
+        const mediaFile = tagTestFixture.mediaFileForTest()
+        const tag = tagTestFixture.tagForTest()
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)
 
@@ -149,17 +146,15 @@ describe('TagController', () => {
 
         const updatedtag = await tagRepository.findOne({ relations: { mediaFiles: true }, where: { id: tag.id } })
         expect(updatedtag.mediaFiles.find((val) => val.id === mediaFile.id)).toBeTruthy()
-      })
-
-
+      }, 1000000)
     })
   })
 
   describe('DELETE /tags/{id}/mediafiles/{id}', () => {
     describe('remove', () => {
       test('成功', async () => {
-        const mediaFile = mediaFileRepository.create({ id: 1, md5: 'md5', extension: 'ext' })
-        const tag = tagFactory.create('tag', [mediaFile])
+        const mediaFile = tagTestFixture.mediaFileForTest()
+        const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile] })
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)
 
@@ -177,8 +172,8 @@ describe('TagController', () => {
   describe('DELETE /tags/{id}', () => {
     describe('delete', () => {
       test('成功', async () => {
-        const mediaFile = mediaFileRepository.create({ id: 1, md5: 'md5', extension: 'ext' })
-        const tag = tagFactory.create('tag', [mediaFile])
+        const mediaFile = tagTestFixture.mediaFileForTest()
+        const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile] })
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)
         await expect(mediaFileRepository.exist({ where: { id: mediaFile.id } })).resolves.toBeTruthy()

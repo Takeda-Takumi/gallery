@@ -5,30 +5,28 @@ import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { TagName } from './tagName.mjs';
 import { MediaFile } from '../mediafile/mediaFile.entity.mjs';
-import { TagFactory } from '../../infrastructure/uuid/tag.factory.mjs';
-import { createTestConfigurationForMySQL, createTestConfigurationForSQLite } from '../../infrastructure/sql/configuration.database.integration.mjs';
+import { createTestConfigurationForSQLite } from '../../infrastructure/sql/configuration.database.integration.mjs';
 import { TagRepositoryToken } from './tag.repository.interface.mjs';
 import { TypeOrmTagRepository } from '../../infrastructure/sql/tag.repository.typeorm.mjs';
+import { TagTestFixture } from './tag.test-fixture.mjs';
 
 describe('TagService', () => {
   let service: TagService;
   let tagRepository: Repository<Tag>;
   let mediaFileRepository: Repository<MediaFile>;
   let dataSource: DataSource;
-  const tagFactory: TagFactory = new TagFactory()
+  const tagTestFixture: TagTestFixture = new TagTestFixture()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot(
-          // createTestConfigurationForMySQL([MediaFile, Tag]),
           createTestConfigurationForSQLite([MediaFile, Tag]),
         ),
         TypeOrmModule.forFeature([MediaFile, Tag]),
       ],
-      providers: [TagService, TagFactory, {
+      providers: [TagService, {
         provide: TagRepositoryToken,
-        // useClass: InMemoryTagRepository
         useClass: TypeOrmTagRepository
       }],
     }).compile();
@@ -43,8 +41,6 @@ describe('TagService', () => {
   });
 
   afterEach(async () => {
-    // await dataSource.createQueryBuilder().delete().from(MediaFile).execute();
-    // await dataSource.createQueryBuilder().delete().from(Tag).execute();
     await dataSource.dropDatabase()
   });
 
@@ -54,7 +50,7 @@ describe('TagService', () => {
 
   describe('create', () => {
     test('同じ名前のタグは作成できない', async () => {
-      const tag = tagFactory.create('test')
+      const tag = tagTestFixture.tagForTest()
       await tagRepository.save(tag);
       expect(service.create(tag.name)).rejects.toThrow();
     });
@@ -62,8 +58,8 @@ describe('TagService', () => {
 
   describe('assignTag', () => {
     test('存在しないタグは指定できない', async () => {
-      const tag = tagFactory.create('test')
-      const mediaFile = { id: 0, md5: 'md5', extension: 'ext' } as MediaFile;
+      const tag = tagTestFixture.tagForTest()
+      const mediaFile = tagTestFixture.mediaFileForTest()
       expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
       await mediaFileRepository.save(mediaFile);
 
@@ -71,8 +67,8 @@ describe('TagService', () => {
     });
 
     test('存在しない画像は指定できない', async () => {
-      const tag = tagFactory.create('test')
-      const mediaFile = { id: 0, md5: 'md5', extension: 'ext' } as MediaFile;
+      const tag = tagTestFixture.tagForTest()
+      const mediaFile = tagTestFixture.mediaFileForTest()
 
       await tagRepository.save(tag);
 
@@ -83,13 +79,8 @@ describe('TagService', () => {
     });
 
     test('初めて画像にタグを付ける', async () => {
-      const tag = tagFactory.create('test')
-      const mediaFile: MediaFile = {
-        id: 0,
-        md5: 'md5',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
+      const tag = tagTestFixture.tagForTest()
+      const mediaFile = tagTestFixture.mediaFileForTest()
 
       await tagRepository.save(tag);
       await mediaFileRepository.save(mediaFile);
@@ -100,50 +91,33 @@ describe('TagService', () => {
     });
 
     test('画像にタグを付ける', async () => {
-      const mediaFile0: MediaFile = {
-        id: 0,
-        md5: 'md50',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const mediaFile1: MediaFile = {
-        id: 1,
-        md5: 'md51',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
+      const mediaFile1 = tagTestFixture.mediaFileForTest1()
+      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1] })
 
-      const tag = tagFactory.create('test', [mediaFile0])
-
-      await mediaFileRepository.save([mediaFile0, mediaFile1]);
+      await mediaFileRepository.save([mediaFile1, mediaFile2]);
       await tagRepository.save(tag);
 
-      const result = await service.assignTag(tag.id, mediaFile1.id);
+      const result = await service.assignTag(tag.id, mediaFile2.id);
       expect(result.mediaFiles.length).toBe(2);
-      expect(result.mediaFiles.at(0).id).toBe(mediaFile0.id);
-      expect(result.mediaFiles.at(1).id).toBe(mediaFile1.id);
+      expect(result.mediaFiles.at(0).id).toBe(mediaFile1.id);
+      expect(result.mediaFiles.at(1).id).toBe(mediaFile2.id);
     });
 
     test('1つの画像に重複してタグを付けられない', async () => {
-      const mediaFile0: MediaFile = {
-        id: 0,
-        md5: 'md50',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
+      const mediaFile1 = tagTestFixture.mediaFileForTest()
+      const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1] })
 
-      const tag = tagFactory.create('test', [mediaFile0])
-
-      await mediaFileRepository.save([mediaFile0]);
+      await mediaFileRepository.save([mediaFile1]);
       await tagRepository.save(tag);
 
-      await expect(service.assignTag(tag.id, mediaFile0.id)).rejects.toThrow();
+      await expect(service.assignTag(tag.id, mediaFile1.id)).rejects.toThrow();
     });
   });
 
   describe('updateTagName', () => {
     test('既存のタグの名前を変更する', async () => {
-      const oldTag = tagFactory.create('old')
+      const oldTag = tagTestFixture.tagForTest({ name: 'old' })
       const newTagName = new TagName('new')
       expect(tagRepository.findOne({ where: { name: newTagName } })).resolves.toBeNull();
 
@@ -159,105 +133,67 @@ describe('TagService', () => {
     });
 
     test('存在しないタグの名前は変更できない', async () => {
-      const tag = tagFactory.create('test')
+      const tag = tagTestFixture.tagForTest()
       expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
       expect(service.changeName(tag.id, new TagName('new'))).rejects.toThrow();
     });
 
     test('既存のタグの名前には変更できない', async () => {
-      const oldTag = tagFactory.create('old')
-      const newTag = tagFactory.create('new')
+      const oldTag = tagTestFixture.tagForTest({ name: 'old' })
+      const newTag = tagTestFixture.tagForTest({ name: 'new' })
       await service.create(oldTag.name);
       await service.create(newTag.name);
       expect(service.changeName(oldTag.id, newTag.name)).rejects.toThrow();
     });
   });
 
-  test('test', async () => {
-    const mediaFile0: MediaFile = {
-      id: 0,
-      md5: 'md50',
-      extension: 'ext',
-      tags: [],
-    } as MediaFile;
-    const mediaFile1: MediaFile = {
-      id: 1,
-      md5: 'md51',
-      extension: 'ext',
-      tags: [],
-    } as MediaFile;
-    await mediaFileRepository.save([mediaFile0, mediaFile1])
-    const tag = tagFactory.create('test', [])
-    await tagRepository.save(tag)
-    const newtag = tag.assign(mediaFile0)
-    await tagRepository.save(newtag)
-
-  })
-
-
   describe('findOne', () => {
     test('idで検索する', async () => {
-      const mediaFile0: MediaFile = {
-        id: 0,
-        md5: 'md50',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const mediaFile1: MediaFile = {
-        id: 1,
-        md5: 'md51',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const tag = tagFactory.create('test', [mediaFile0, mediaFile1])
-      await mediaFileRepository.save([mediaFile0, mediaFile1]);
+      const mediaFile1 = tagTestFixture.mediaFileForTest1()
+      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1, mediaFile2] })
+
+      await mediaFileRepository.save([mediaFile1, mediaFile2]);
       await tagRepository.save(tag);
+
       const result: Tag = await service.findOne(tag.id);
       expect(result.name).toStrictEqual(tag.name);
-    }, 1000000);
+    });
   });
 
   describe('delete', () => {
     test('存在しないタグは消せない', async () => {
-      const tag = tagFactory.create('test')
+      const tag = tagTestFixture.tagForTest()
+
       expect(tagRepository.exist({ where: { id: tag.id } })).resolves.toBeFalsy;
       await expect(service.delete(tag.id)).rejects.toThrow();
     });
 
     test('タグに付いていた画像を消さない', async () => {
-      const mediaFile0: MediaFile = {
-        id: 0,
-        md5: 'md50',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const mediaFile1: MediaFile = {
-        id: 1,
-        md5: 'md51',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const tag = tagFactory.create('test', [mediaFile0])
+      const mediaFile1 = tagTestFixture.mediaFileForTest1()
+      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1] })
 
-      await mediaFileRepository.save([mediaFile0, mediaFile1]);
+      await mediaFileRepository.save([mediaFile1, mediaFile2]);
       await tagRepository.save(tag);
 
       await service.delete(tag.id);
 
       expect(await tagRepository.exist({ where: { id: tag.id } })).toBeFalsy();
       expect(
-        await mediaFileRepository.exist({ where: { id: mediaFile0.id } }),
+        await mediaFileRepository.exist({ where: { id: mediaFile1.id } }),
       ).toBeTruthy();
       expect(
-        await mediaFileRepository.exist({ where: { id: mediaFile1.id } }),
+        await mediaFileRepository.exist({ where: { id: mediaFile2.id } }),
       ).toBeTruthy();
     });
   });
 
   describe('remove', () => {
     test('存在しないタグは指定できない', async () => {
-      const tag = tagFactory.create('test')
-      const mediaFile = { id: 0, md5: 'md5', extension: 'ext' } as MediaFile;
+      const mediaFile = tagTestFixture.mediaFileForTest()
+      const tag = tagTestFixture.tagForTest()
+
       await mediaFileRepository.save(mediaFile);
 
       await expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
@@ -265,8 +201,9 @@ describe('TagService', () => {
     });
 
     test('存在しない画像は指定できない', async () => {
-      const tag = tagFactory.create('test')
-      const mediaFile = { id: 0, md5: 'md5', extension: 'ext' } as MediaFile;
+      const mediaFile = tagTestFixture.mediaFileForTest()
+      const tag = tagTestFixture.tagForTest()
+
       await tagRepository.save(tag);
 
       await expect(
@@ -276,8 +213,8 @@ describe('TagService', () => {
     });
 
     test('指定したタグが付いていない画像は指定できない', async () => {
-      const tag = tagFactory.create('test')
-      const mediaFile = { id: 0, md5: 'md5', extension: 'ext' } as MediaFile;
+      const mediaFile = tagTestFixture.mediaFileForTest()
+      const tag = tagTestFixture.tagForTest()
       await tagRepository.save(tag);
       await mediaFileRepository.save(mediaFile);
 
@@ -285,21 +222,11 @@ describe('TagService', () => {
     });
 
     test('指定した画像から指定されたタグをはずす', async () => {
-      const mediaFile0: MediaFile = {
-        id: 0,
-        md5: 'md50',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const mediaFile1: MediaFile = {
-        id: 1,
-        md5: 'md51',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const tag = tagFactory.create('test', [mediaFile0, mediaFile1])
+      const mediaFile1 = tagTestFixture.mediaFileForTest1()
+      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1, mediaFile2] })
 
-      await mediaFileRepository.save([mediaFile0, mediaFile1]);
+      await mediaFileRepository.save([mediaFile1, mediaFile2]);
       await tagRepository.save(tag);
 
       const oldTag = await tagRepository.findOne({
@@ -308,29 +235,24 @@ describe('TagService', () => {
       });
       expect(oldTag.mediaFiles.length).toBe(2);
 
-      await service.remove(tag.id, mediaFile1.id);
+      await service.remove(tag.id, mediaFile2.id);
 
       const newTag = await tagRepository.findOne({
         relations: { mediaFiles: true },
         where: { id: tag.id },
       });
       expect(newTag.mediaFiles.length).toBe(1);
-      expect(newTag.mediaFiles.at(0).id).toBe(mediaFile0.id);
+      expect(newTag.mediaFiles.at(0).id).toBe(mediaFile1.id);
     });
 
     test('指定した画像に指定したタグがついている', async () => {
-      const mediaFile0: MediaFile = {
-        id: 0,
-        md5: 'md50',
-        extension: 'ext',
-        tags: [],
-      } as MediaFile;
-      const tag = tagFactory.create('test')
+      const mediaFile = tagTestFixture.mediaFileForTest()
+      const tag = tagTestFixture.tagForTest()
 
-      await mediaFileRepository.save(mediaFile0);
+      await mediaFileRepository.save(mediaFile);
       await tagRepository.save(tag);
 
-      await expect(service.remove(tag.id, mediaFile0.id)).rejects.toThrow();
+      await expect(service.remove(tag.id, mediaFile.id)).rejects.toThrow();
     });
   });
 });
