@@ -6,18 +6,9 @@ import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Tag } from '../../../../domain/tag/tag.entity.mjs';
 import { DataSource, Repository } from 'typeorm';
 import { MediaFile } from '../../../../domain/mediafile/mediaFile.entity.mjs';
-import { MediaFileModule } from '../../../../domain/mediafile/mediaFile.module.mjs';
 import { createTestConfigurationForSQLite } from '../../../../infrastructure/sql/configuration.database.integration.mjs';
-import { TypeOrmTagRepository } from '../../../../infrastructure/sql/tag.repository.typeorm.mjs';
-import { TagService } from '../../../../domain/tag/tag.service.mjs';
-import { DeleteUseCase } from '../../../../application/tag/delete/delete.usecase.mjs';
-import { RemoveUseCase } from '../../../../application/tag/remove/remove.usecase.mjs';
-import { AssignUseCase } from '../../../../application/tag/assign/assign.usecase.mjs';
-import { CreateTagUseCase } from '../../../../application/tag/create-tag/create-tag.usecase.mjs';
-import { FindTagUseCase } from '../../../../application/tag/find-tag/find-tag.usecase.mjs';
-import { ChangeTagNameUsecase } from '../../../../application/tag/change-tag-name/change-tag-name.usecase.mjs';
-import { TagRepositoryToken } from '../../../../domain/tag/tag.repository.interface.mjs';
 import { TagTestFixture } from '../../../../domain/tag/tag.test-fixture.mjs';
+import { AppModule } from '../../../../app.module.mjs';
 
 
 describe('TagController', () => {
@@ -30,25 +21,11 @@ describe('TagController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [TagController],
-      imports: [MediaFileModule,
+      imports: [
+        AppModule,
         TypeOrmModule.forRoot(
           createTestConfigurationForSQLite([MediaFile, Tag]),
         ),
-        TypeOrmModule.forFeature([MediaFile, Tag]),
-      ],
-      providers: [
-        {
-          provide: TagRepositoryToken,
-          useClass: TypeOrmTagRepository
-        },
-        DeleteUseCase,
-        RemoveUseCase,
-        AssignUseCase,
-        ChangeTagNameUsecase,
-        CreateTagUseCase,
-        FindTagUseCase,
-        TagService,
       ]
     }).compile();
 
@@ -60,11 +37,6 @@ describe('TagController', () => {
     );
 
     dataSource = module.get(DataSource);
-
-
-    app.useGlobalPipes(new ValidationPipe({
-      transform: true
-    }));
 
     await app.init()
 
@@ -128,7 +100,7 @@ describe('TagController', () => {
         const oldTag = tagTestFixture.tagForTest({ name: 'oldTag' })
         await tagRepository.save(oldTag)
         const response = await request(app.getHttpServer()).put('/tags/' + oldTag.id.id).send({ name: oldTag.name.name })
-        expect(response.status).toBe(500)
+        expect(response.status).toBe(400)
       })
     })
   })
@@ -146,7 +118,7 @@ describe('TagController', () => {
 
         const updatedtag = await tagRepository.findOne({ relations: { mediaFiles: true }, where: { id: tag.id } })
         expect(updatedtag.mediaFiles.find((val) => val.id === mediaFile.id)).toBeTruthy()
-      }, 1000000)
+      })
     })
   })
 
