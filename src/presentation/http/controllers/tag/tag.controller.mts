@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseFilters } from '@nestjs/common';
 import { FindTagUseCase } from '../../../../application/tag/find-tag/find-tag.usecase.mjs';
 import { CreateTagUseCase } from '../../../../application/tag/create-tag/create-tag.usecase.mjs';
 import { AssignUseCase } from '../../../../application/tag/assign/assign.usecase.mjs';
@@ -11,8 +11,10 @@ import { AssignParams } from './assign.params.mjs';
 import { RemoveParams } from './remove.params.mjs';
 import { DeleteParams } from './delete.params.mjs';
 import { ChangeTagNameUsecase } from '../../../../application/tag/change-tag-name/change-tag-name.usecase.mjs';
+import { DomainExceptionFilter } from '../http-exception.filter.mjs';
 
 @Controller('tags')
+@UseFilters(new DomainExceptionFilter())
 export class TagController {
   constructor(
     private readonly findTagUseCase: FindTagUseCase,
