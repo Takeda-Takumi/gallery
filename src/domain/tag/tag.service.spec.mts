@@ -9,6 +9,8 @@ import { createTestConfigurationForSQLite } from '../../infrastructure/sql/confi
 import { TagRepositoryToken } from './tag.repository.interface.mjs';
 import { TypeOrmTagRepository } from '../../infrastructure/sql/tag.repository.typeorm.mjs';
 import { TagTestFixture } from './tag.test-fixture.mjs';
+import { AlreadyAssignedException, NotAssignedException, TagAlreadyExistsInRepositoryException, TagIsNotFoundInRepositoryException } from './tag.exception.mjs';
+import { MediaFileIsNotFoundInRepositoryException } from '../mediafile/mediaFile.exception.mjs';
 
 describe('TagService', () => {
   let service: TagService;
@@ -52,7 +54,7 @@ describe('TagService', () => {
     test('同じ名前のタグは作成できない', async () => {
       const tag = tagTestFixture.tagForTest()
       await tagRepository.save(tag);
-      expect(service.create(tag.name)).rejects.toThrow();
+      expect(service.create(tag.name)).rejects.toBeInstanceOf(TagAlreadyExistsInRepositoryException);
     });
   });
 
@@ -63,7 +65,7 @@ describe('TagService', () => {
       expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
       await mediaFileRepository.save(mediaFile);
 
-      await expect(service.assignTag(tag.id, mediaFile.id)).rejects.toThrow();
+      await expect(service.assignTag(tag.id, mediaFile.id)).rejects.toBeInstanceOf(TagIsNotFoundInRepositoryException);
     });
 
     test('存在しない画像は指定できない', async () => {
@@ -75,7 +77,7 @@ describe('TagService', () => {
       await expect(
         mediaFileRepository.findOneBy({ id: mediaFile.id }),
       ).resolves.toBeNull();
-      await expect(service.assignTag(tag.id, mediaFile.id)).rejects.toThrow();
+      await expect(service.assignTag(tag.id, mediaFile.id)).rejects.toBeInstanceOf(MediaFileIsNotFoundInRepositoryException);
     });
 
     test('初めて画像にタグを付ける', async () => {
@@ -111,7 +113,7 @@ describe('TagService', () => {
       await mediaFileRepository.save([mediaFile1]);
       await tagRepository.save(tag);
 
-      await expect(service.assignTag(tag.id, mediaFile1.id)).rejects.toThrow();
+      await expect(service.assignTag(tag.id, mediaFile1.id)).rejects.toBeInstanceOf(AlreadyAssignedException);
     });
   });
 
@@ -135,7 +137,7 @@ describe('TagService', () => {
     test('存在しないタグの名前は変更できない', async () => {
       const tag = tagTestFixture.tagForTest()
       expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
-      expect(service.changeName(tag.id, new TagName('new'))).rejects.toThrow();
+      expect(service.changeName(tag.id, new TagName('new'))).rejects.toBeInstanceOf(TagIsNotFoundInRepositoryException);
     });
 
     test('既存のタグの名前には変更できない', async () => {
@@ -165,7 +167,7 @@ describe('TagService', () => {
       const tag = tagTestFixture.tagForTest()
 
       expect(tagRepository.exist({ where: { id: tag.id } })).resolves.toBeFalsy;
-      await expect(service.delete(tag.id)).rejects.toThrow();
+      await expect(service.delete(tag.id)).rejects.toBeInstanceOf(TagIsNotFoundInRepositoryException);
     });
 
     test('タグに付いていた画像を消さない', async () => {
@@ -196,7 +198,7 @@ describe('TagService', () => {
       await mediaFileRepository.save(mediaFile);
 
       await expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
-      await expect(service.remove(tag.id, mediaFile.id)).rejects.toThrow();
+      await expect(service.remove(tag.id, mediaFile.id)).rejects.toBeInstanceOf(TagIsNotFoundInRepositoryException);
     });
 
     test('存在しない画像は指定できない', async () => {
@@ -208,7 +210,7 @@ describe('TagService', () => {
       await expect(
         mediaFileRepository.findOneBy({ id: mediaFile.id }),
       ).resolves.toBeNull();
-      await expect(service.remove(tag.id, mediaFile.id)).rejects.toThrow();
+      await expect(service.remove(tag.id, mediaFile.id)).rejects.toBeInstanceOf(MediaFileIsNotFoundInRepositoryException);
     });
 
     test('指定したタグが付いていない画像は指定できない', async () => {
@@ -217,7 +219,7 @@ describe('TagService', () => {
       await tagRepository.save(tag);
       await mediaFileRepository.save(mediaFile);
 
-      await expect(service.remove(tag.id, mediaFile.id)).rejects.toThrow();
+      await expect(service.remove(tag.id, mediaFile.id)).rejects.toBeInstanceOf(NotAssignedException);
     });
 
     test('指定した画像から指定されたタグをはずす', async () => {
