@@ -139,11 +139,10 @@ describe('TagService', () => {
     });
 
     test('既存のタグの名前には変更できない', async () => {
-      const oldTag = tagTestFixture.tagForTest({ name: 'old' })
-      const newTag = tagTestFixture.tagForTest({ name: 'new' })
-      await service.create(oldTag.name);
-      await service.create(newTag.name);
-      expect(service.changeName(oldTag.id, newTag.name)).rejects.toThrow();
+      const oldTag = tagTestFixture.tagForTest1({ name: 'old' })
+      const newTag = tagTestFixture.tagForTest2({ name: 'new' })
+      await tagRepository.save([oldTag, newTag])
+      expect(service.changeName(oldTag.id, newTag.name)).rejects.toBeInstanceOf(TagAlreadyExistsInRepositoryException);
     });
   });
 
