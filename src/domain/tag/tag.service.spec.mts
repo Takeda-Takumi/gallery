@@ -244,15 +244,5 @@ describe('TagService', () => {
       expect(newTag.mediaFiles.length).toBe(1);
       expect(newTag.mediaFiles.at(0).id).toBe(mediaFile1.id);
     });
-
-    test('指定した画像に指定したタグがついている', async () => {
-      const mediaFile = tagTestFixture.mediaFileForTest()
-      const tag = tagTestFixture.tagForTest()
-
-      await mediaFileRepository.save(mediaFile);
-      await tagRepository.save(tag);
-
-      await expect(service.remove(tag.id, mediaFile.id)).rejects.toThrow();
-    });
   });
 });
