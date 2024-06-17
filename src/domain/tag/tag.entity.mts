@@ -9,6 +9,7 @@ import {
 import { TagName } from './tagName.mjs';
 import { TagId } from './tagId.mjs';
 import { MediaFile } from '../mediafile/mediaFile.entity.mjs';
+import { AlreadyAssignedException, NotAssignedException } from './tag.exception.mjs';
 
 @Entity({ synchronize: true })
 @Unique(['name'])
@@ -38,7 +39,7 @@ export class Tag {
 
   public assign(mediaFile: MediaFile) {
     if (this.mediaFiles.find((value) => value.id === mediaFile.id))
-      throw new Error();
+      throw new AlreadyAssignedException();
     return new Tag(this.id, this.name, [...this.mediaFiles, mediaFile])
   }
 
@@ -52,7 +53,7 @@ export class Tag {
 
   public remove(mediaFileId: number) {
     if (!this.mediaFiles.find((value) => value.id === mediaFileId))
-      throw new Error();
+      throw new NotAssignedException();
 
     const updatedMediaFiles = this.mediaFiles.filter((mediaFile) => {
       return mediaFile.id !== mediaFileId;

@@ -5,6 +5,16 @@ import { TagName } from "./tagName.mjs";
 
 export class TagTestFixture {
   tagForTest({
+    id, name, mediaFiles
+  }: {
+    name?: string
+    id?: string
+    mediaFiles?: MediaFile[]
+  } = {}) {
+    return this.tagForTest1({ name: name, id: id, mediaFiles: mediaFiles })
+  }
+
+  tagForTest1({
     id = '1fe5dfe0-8ee4-43ef-919b-c8f6153e7343',
     name = 'name',
     mediaFiles = []
@@ -20,6 +30,24 @@ export class TagTestFixture {
     )
     return tag
   }
+
+  tagForTest2({
+    id = 'b6d61734-867e-4ee3-baa3-05624756a05e',
+    name = 'name2',
+    mediaFiles = []
+  }: {
+    name?: string
+    id?: string
+    mediaFiles?: MediaFile[]
+  } = {}) {
+    const tag: Tag = new Tag(
+      new TagId(id),
+      new TagName(name),
+      mediaFiles
+    )
+    return tag
+  }
+
 
   mediaFileForTest() {
     return this.mediaFileForTest1()
