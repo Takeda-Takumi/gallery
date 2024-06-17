@@ -6,6 +6,8 @@ import { TagName } from './tagName.mjs';
 import { TagId } from './tagId.mjs';
 import { MediaFile } from '../mediafile/mediaFile.entity.mjs';
 import { TagRepository, TagRepositoryToken } from './tag.repository.interface.mjs';
+import { TagAlreadyExistsInRepositoryException, TagIsNotFoundInRepositoryException } from './tag.exception.mjs';
+import { MediaFileIsNotFoundInRepositoryException } from '../mediafile/mediaFile.exception.mjs';
 
 @Injectable()
 export class TagService {
@@ -23,7 +25,7 @@ export class TagService {
   public async create(name: TagName) {
 
     if (await this.tagRepository.findOneByName(name))
-      throw new Error();
+      throw new TagAlreadyExistsInRepositoryException();
 
     const newTag = new Tag(await this.tagRepository.nextIdentity(), name, [])
 
@@ -31,9 +33,10 @@ export class TagService {
   }
 
   public async assignTag(tagId: TagId, mediaFileId: number) {
-    if (!(await this.tagRepository.existsById(tagId))) throw new Error();
+    if (!(await this.tagRepository.existsById(tagId)))
+      throw new TagIsNotFoundInRepositoryException();
     if (!(await this.mediaFileRepository.exist({ where: { id: mediaFileId } })))
-      throw new Error();
+      throw new MediaFileIsNotFoundInRepositoryException();
 
     const tag: Tag = await this.tagRepository.findOneById(tagId);
     const mediaFile: MediaFile = await this.mediaFileRepository.findOne({
@@ -49,9 +52,10 @@ export class TagService {
 
   public async changeName(tagId: TagId, newTagName: TagName): Promise<Tag> {
     if (!(await this.tagRepository.existsById(tagId))) {
-      throw new Error();
+      throw new TagIsNotFoundInRepositoryException();
     }
-    if (await this.tagRepository.existsByName(newTagName)) throw new Error();
+    if (await this.tagRepository.existsByName(newTagName))
+      throw new TagAlreadyExistsInRepositoryException();
 
     const tag: Tag = await this.tagRepository.findOneById(tagId);
 
@@ -64,9 +68,9 @@ export class TagService {
 
   public async remove(tagId: TagId, mediaFileId: number) {
     if (!(await this.tagRepository.existsById(tagId)))
-      throw new Error();
+      throw new TagIsNotFoundInRepositoryException();
     if (!(await this.mediaFileRepository.exist({ where: { id: mediaFileId } })))
-      throw new Error();
+      throw new MediaFileIsNotFoundInRepositoryException();
 
     const tag = await this.tagRepository.findOneById(tagId);
 
@@ -76,7 +80,8 @@ export class TagService {
   }
 
   public async delete(tagId: TagId) {
-    if (!(await this.tagRepository.existsById(tagId))) throw new Error();
+    if (!(await this.tagRepository.existsById(tagId)))
+      throw new TagIsNotFoundInRepositoryException();
     const tag = await this.tagRepository.findOneById(tagId);
     await this.tagRepository.remove(tag);
   }
