@@ -8,6 +8,9 @@ import { MediaFile } from '../../../../domain/mediafile/mediaFile.entity.mjs';
 import { MediaFileService } from '../../../../domain/mediafile/mediaFile.service.mjs';
 import { MediaFileFactory } from '../../../../domain/mediafile/mediaFile.factory.mjs';
 import { MediaFileRepositoryMock } from '../../../../infrastructure/in-memory/mediaFile.repository.mock.mjs';
+import { FindOneUseCase } from '../../../../application/media-file/find-one.usecase.mjs';
+import { UploadUseCase } from '../../../../application/media-file/upload.usecase.mjs';
+import { RemoveUseCase } from '../../../../application/media-file/remove.usecase.mjs';
 
 describe('MediaFileController', () => {
   let controller: MediaFileController;
@@ -29,6 +32,9 @@ describe('MediaFileController', () => {
           provide: getRepositoryToken(MediaFile),
           useClass: MediaFileRepositoryMock,
         },
+        RemoveUseCase,
+        FindOneUseCase,
+        UploadUseCase
       ],
     }).compile();
 
@@ -73,7 +79,7 @@ describe('MediaFileController', () => {
 
     const result = await request(app.getHttpServer()).get('/images/' + id);
     expect(result.status).toBe(200);
-    expect(result.body).toStrictEqual(data);
+    expect(result.body).toStrictEqual({ id: String(data.id) });
   });
 
   test('GET /images/id none', async () => {

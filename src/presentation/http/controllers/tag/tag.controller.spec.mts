@@ -23,11 +23,14 @@ describe('TagController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         AppModule,
+      ]
+    }).overrideModule(TypeOrmModule)
+      .useModule(
         TypeOrmModule.forRoot(
           createTestConfigurationForSQLite([MediaFile, Tag]),
         ),
-      ]
-    }).compile();
+      )
+      .compile();
 
     app = module.createNestApplication();
     controller = module.get<TagController>(TagController);
