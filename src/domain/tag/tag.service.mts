@@ -25,7 +25,7 @@ export class TagService {
 
   public async create(name: TagName) {
 
-    if (await this.tagRepository.findOneByName(name))
+    if (await this.tagRepository.existsByName(name))
       throw new TagAlreadyExistsInRepositoryException();
 
     const newTag = new Tag(await this.tagRepository.nextIdentity(), name, [])
