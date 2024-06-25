@@ -11,7 +11,7 @@ export class FindOneUseCaseOutputDto {
   readonly md5: string
   readonly tags: Tag[]
   constructor(mediaFile: MediaFile) {
-    this.id = String(mediaFile.id)
+    this.id = mediaFile.id.id
     this.md5 = mediaFile.md5
     this.tags = mediaFile.tags
   }

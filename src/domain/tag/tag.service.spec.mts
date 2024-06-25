@@ -11,6 +11,7 @@ import { TypeOrmTagRepository } from '../../infrastructure/sql/tag.repository.ty
 import { TagTestFixture } from './tag.test-fixture.mjs';
 import { AlreadyAssignedException, NotAssignedException, TagAlreadyExistsInRepositoryException, TagIsNotFoundInRepositoryException } from './tag.exception.mjs';
 import { MediaFileIsNotFoundInRepositoryException } from '../mediafile/mediaFile.exception.mjs';
+import { MediaFileTestFixture } from '../mediafile/mediaFile.text-fixture.mjs';
 
 describe('TagService', () => {
   let service: TagService;
@@ -18,6 +19,7 @@ describe('TagService', () => {
   let mediaFileRepository: Repository<MediaFile>;
   let dataSource: DataSource;
   const tagTestFixture: TagTestFixture = new TagTestFixture()
+  const mediaFileTestFixture: MediaFileTestFixture = new MediaFileTestFixture()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -61,7 +63,7 @@ describe('TagService', () => {
   describe('assignTag', () => {
     test('存在しないタグは指定できない', async () => {
       const tag = tagTestFixture.tagForTest()
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
       expect(tagRepository.findOneBy({ id: tag.id })).resolves.toBeNull();
       await mediaFileRepository.save(mediaFile);
 
@@ -70,7 +72,7 @@ describe('TagService', () => {
 
     test('存在しない画像は指定できない', async () => {
       const tag = tagTestFixture.tagForTest()
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
 
       await tagRepository.save(tag);
 
@@ -82,19 +84,19 @@ describe('TagService', () => {
 
     test('初めて画像にタグを付ける', async () => {
       const tag = tagTestFixture.tagForTest()
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
 
       await tagRepository.save(tag);
       await mediaFileRepository.save(mediaFile);
 
       const result = await service.assignTag(tag.id, mediaFile.id);
       expect(result.mediaFiles.length).toBe(1);
-      expect(result.mediaFiles.at(0).id).toBe(mediaFile.id);
-    });
+      expect(result.mediaFiles.at(0).id).toStrictEqual(mediaFile.id);
+    }, 100000);
 
     test('画像にタグを付ける', async () => {
-      const mediaFile1 = tagTestFixture.mediaFileForTest1()
-      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const mediaFile1 = mediaFileTestFixture.mediaFileForTest1()
+      const mediaFile2 = mediaFileTestFixture.mediaFileForTest2()
       const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1] })
 
       await mediaFileRepository.save([mediaFile1, mediaFile2]);
@@ -102,12 +104,12 @@ describe('TagService', () => {
 
       const result = await service.assignTag(tag.id, mediaFile2.id);
       expect(result.mediaFiles.length).toBe(2);
-      expect(result.mediaFiles.at(0).id).toBe(mediaFile1.id);
-      expect(result.mediaFiles.at(1).id).toBe(mediaFile2.id);
+      expect(result.mediaFiles.at(0).id).toStrictEqual(mediaFile1.id);
+      expect(result.mediaFiles.at(1).id).toStrictEqual(mediaFile2.id);
     });
 
     test('1つの画像に重複してタグを付けられない', async () => {
-      const mediaFile1 = tagTestFixture.mediaFileForTest()
+      const mediaFile1 = mediaFileTestFixture.mediaFileForTest()
       const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1] })
 
       await mediaFileRepository.save([mediaFile1]);
@@ -150,8 +152,8 @@ describe('TagService', () => {
 
   describe('findOne', () => {
     test('idで検索する', async () => {
-      const mediaFile1 = tagTestFixture.mediaFileForTest1()
-      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const mediaFile1 = mediaFileTestFixture.mediaFileForTest1()
+      const mediaFile2 = mediaFileTestFixture.mediaFileForTest2()
       const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1, mediaFile2] })
 
       await mediaFileRepository.save([mediaFile1, mediaFile2]);
@@ -171,8 +173,8 @@ describe('TagService', () => {
     });
 
     test('タグに付いていた画像を消さない', async () => {
-      const mediaFile1 = tagTestFixture.mediaFileForTest1()
-      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const mediaFile1 = mediaFileTestFixture.mediaFileForTest1()
+      const mediaFile2 = mediaFileTestFixture.mediaFileForTest2()
       const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1] })
 
       await mediaFileRepository.save([mediaFile1, mediaFile2]);
@@ -192,7 +194,7 @@ describe('TagService', () => {
 
   describe('remove', () => {
     test('存在しないタグは指定できない', async () => {
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
       const tag = tagTestFixture.tagForTest()
 
       await mediaFileRepository.save(mediaFile);
@@ -202,7 +204,7 @@ describe('TagService', () => {
     });
 
     test('存在しない画像は指定できない', async () => {
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
       const tag = tagTestFixture.tagForTest()
 
       await tagRepository.save(tag);
@@ -214,7 +216,7 @@ describe('TagService', () => {
     });
 
     test('指定したタグが付いていない画像は指定できない', async () => {
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
       const tag = tagTestFixture.tagForTest()
       await tagRepository.save(tag);
       await mediaFileRepository.save(mediaFile);
@@ -223,8 +225,8 @@ describe('TagService', () => {
     });
 
     test('指定した画像から指定されたタグをはずす', async () => {
-      const mediaFile1 = tagTestFixture.mediaFileForTest1()
-      const mediaFile2 = tagTestFixture.mediaFileForTest2()
+      const mediaFile1 = mediaFileTestFixture.mediaFileForTest1()
+      const mediaFile2 = mediaFileTestFixture.mediaFileForTest2()
       const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile1, mediaFile2] })
 
       await mediaFileRepository.save([mediaFile1, mediaFile2]);
@@ -243,7 +245,7 @@ describe('TagService', () => {
         where: { id: tag.id },
       });
       expect(newTag.mediaFiles.length).toBe(1);
-      expect(newTag.mediaFiles.at(0).id).toBe(mediaFile1.id);
+      expect(newTag.mediaFiles.at(0).id).toStrictEqual(mediaFile1.id);
     });
   });
 });

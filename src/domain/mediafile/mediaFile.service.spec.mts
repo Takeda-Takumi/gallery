@@ -4,10 +4,13 @@ import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
 import { MediaFileService } from './mediaFile.service.mjs';
 import { MediaFileRepositoryMock } from '../../infrastructure/in-memory/mediaFile.repository.mock.mjs';
+import { MediaFileTestFixture } from './mediaFile.text-fixture.mjs';
+import { MediaFileId } from './media-file-id.mjs';
 
 describe('MediafileService', () => {
   let service: MediaFileService;
   let mediaFileRepository: Repository<MediaFile>;
+  const mediaFileTestFixture: MediaFileTestFixture = new MediaFileTestFixture()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,14 +42,16 @@ describe('MediafileService', () => {
       });
 
       test('findOne md5 empty', async () => {
-        await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
+        const data = mediaFileTestFixture.mediaFileForTest()
+        await mediaFileRepository.insert(data)
         const result = await service.findOne({ md5: '' });
         expect(result).toBeNull();
       });
 
       test('parameter md5 which is undefined return first element', async () => {
-        const data1 = { md5: 'test1', extension: 'png' };
-        const data2 = { md5: 'test2', extension: 'png' };
+
+        const data1 = mediaFileTestFixture.mediaFileForTest1()
+        const data2 = mediaFileTestFixture.mediaFileForTest2()
 
         await mediaFileRepository.insert(data1);
         await mediaFileRepository.insert(data2);
@@ -63,82 +68,90 @@ describe('MediafileService', () => {
 
     describe('id', () => {
       test('find one by id', async () => {
-        const data1 = { md5: 'test1', extension: 'png', id: 0 };
-        const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+        const data1 = mediaFileTestFixture.mediaFileForTest1()
+        const data2 = mediaFileTestFixture.mediaFileForTest2()
 
         await mediaFileRepository.insert(data1);
         await mediaFileRepository.insert(data2);
-        expect(service.findOne({ id: 1 })).resolves.toStrictEqual(data2);
+        expect(service.findOne({ id: data2.id })).resolves.toStrictEqual(data2);
       });
 
       test("id which dosen't exist returns null", async () => {
-        const data1 = { md5: 'test1', extension: 'png', id: 0 };
-        const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+        const data1 = mediaFileTestFixture.mediaFileForTest1()
+        const data2 = mediaFileTestFixture.mediaFileForTest2()
 
         await mediaFileRepository.insert(data1);
         await mediaFileRepository.insert(data2);
-        expect(service.findOne({ id: 2 })).resolves.toBeNull();
+        expect(service.findOne({ id: new MediaFileId("nothing") })).resolves.toBeNull();
       });
     });
 
     test("md5 and id exist but data dosen't exist ", async () => {
-      const data1 = { md5: 'test1', extension: 'png', id: 0 };
-      const data2 = { md5: 'test2', extension: 'png', id: 1 };
+
+      const data1 = mediaFileTestFixture.mediaFileForTest1()
+      const data2 = mediaFileTestFixture.mediaFileForTest2()
 
       await mediaFileRepository.insert(data1);
       await mediaFileRepository.insert(data2);
-      expect(service.findOne({ md5: 'test1', id: 1 })).resolves.toBeNull();
+      expect(service.findOne({ md5: 'test1', id: new MediaFileId("nothing") })).resolves.toBeNull();
     });
   });
 
   describe('exist', () => {
     test('exist md5 "test"', async () => {
-      await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-      await expect(service.exists({ md5: 'test' })).resolves.toBeTruthy();
+      const data = mediaFileTestFixture.mediaFileForTest()
+      await mediaFileRepository.insert(data)
+      await expect(service.exists({ md5: data.md5 })).resolves.toBeTruthy();
     });
 
     test('not exist md5 "notExist"', async () => {
-      await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-      await expect(service.exists({ md5: 'notExist' })).resolves.toBeFalsy();
+      const data = mediaFileTestFixture.mediaFileForTest()
+      await mediaFileRepository.insert(data)
+      await expect(service.exists({ md5: 'nothing' })).resolves.toBeFalsy();
     });
   });
-
+  //
   describe('insert', () => {
     test('success insert', async () => {
-      const fakeImage = new MediaFile(null, 'test', 'png');
-      await expect(service.exists({ md5: fakeImage.md5 })).resolves.toBeFalsy();
-      await service.insert(fakeImage);
+      const data = mediaFileTestFixture.mediaFileForTest()
+      await expect(service.exists({ md5: data.md5 })).resolves.toBeFalsy();
+      await service.insert(data.md5, data.extension);
     });
 
     test('fail if same md5 exists', async () => {
-      const fakeImage = new MediaFile(null, 'test', 'png');
       await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-      await expect(service.exists({ md5: 'test' })).resolves.toBeTruthy();
-      await expect(service.insert(fakeImage)).rejects.toThrow('duplicate');
+
+      const data = mediaFileTestFixture.mediaFileForTest()
+      await mediaFileRepository.insert(data)
+
+      await expect(service.exists({ md5: data.md5 })).resolves.toBeTruthy();
+      await expect(service.insert(data.md5, data.extension)).rejects.toThrow('duplicate');
     });
   });
 
   describe('remove', () => {
     test('remove media file by id', async () => {
-      const data1 = { id: 0, md5: 'data1' };
-      const data2 = { id: 1, md5: 'data2' };
+      const data1 = mediaFileTestFixture.mediaFileForTest1()
+      const data2 = mediaFileTestFixture.mediaFileForTest2()
+
       await mediaFileRepository.insert(data1);
       await mediaFileRepository.insert(data2);
 
-      await service.remove(0);
+      await service.remove(data1.id);
       expect(
-        mediaFileRepository.findOne({ where: { md5: 'data1' } }),
+        mediaFileRepository.findOne({ where: { md5: data1.md5 } }),
       ).resolves.toBeNull();
       expect(
-        mediaFileRepository.findOne({ where: { md5: 'data2' } }),
+        mediaFileRepository.findOne({ where: { md5: data2.md5 } }),
       ).resolves.toStrictEqual(data2);
     });
 
     test('removing media file which dose not exist is invalid', async () => {
-      const data1 = { id: 0, md5: 'data1' };
-      await mediaFileRepository.insert(data1);
+      const data1 = mediaFileTestFixture.mediaFileForTest1()
 
-      expect(service.remove(1)).rejects.toThrow();
+      expect(service.remove(data1.id)).rejects.toThrow();
     });
   });
 });
