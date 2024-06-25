@@ -42,7 +42,7 @@ export class MediaFileService {
       extension: extension,
     });
 
-    await this.mediaFileRepository.insert(newMediaFile);
+    return await this.mediaFileRepository.save(newMediaFile);
   }
 
   public async remove(id: MediaFileId) {
