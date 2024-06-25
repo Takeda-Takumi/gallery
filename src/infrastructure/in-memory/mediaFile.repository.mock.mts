@@ -27,7 +27,7 @@ export class MediaFileRepositoryMock {
     if (typeof result === 'undefined') return null;
     return result;
   }
-  public async create(image: Partial<MediaFile>): Promise<Partial<MediaFile>> {
+  public create(image: Partial<MediaFile>): Partial<MediaFile>{
     return { md5: image.md5, extension: image.extension };
   }
 
