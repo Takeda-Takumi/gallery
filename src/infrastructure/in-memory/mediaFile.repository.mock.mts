@@ -1,9 +1,10 @@
+import { MediaFileId } from "../../domain/mediafile/media-file-id.mjs";
 import { MediaFile } from "../../domain/mediafile/mediaFile.entity.mjs";
 
 type Options = {
   where: {
     md5?: string;
-    id?: number;
+    id?: MediaFileId;
   };
 };
 
@@ -20,7 +21,7 @@ export class MediaFileRepositoryMock {
     const result = this.mediaFileRepositoryMock.find((value) => {
       return (
         (typeof md5 === 'undefined' || value.md5 === md5) &&
-        (typeof id === 'undefined' || value.id === id)
+        (typeof id === 'undefined' || value.id.id === id.id)
       );
     });
     if (typeof result === 'undefined') return null;
@@ -36,7 +37,7 @@ export class MediaFileRepositoryMock {
     });
     if (removed === null) return;
     this.mediaFileRepositoryMock = this.mediaFileRepositoryMock.filter(
-      (value) => value.md5 !== removed.md5 || value.id !== removed.id,
+      (value) => value.md5 !== removed.md5 || value.id.id !== removed.id.id,
     );
     return;
   }
