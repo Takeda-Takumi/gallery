@@ -8,6 +8,7 @@ import { MediaFile } from '../mediafile/mediaFile.entity.mjs';
 import { TagRepository, TagRepositoryToken } from './tag.repository.interface.mjs';
 import { TagAlreadyExistsInRepositoryException, TagIsNotFoundInRepositoryException } from './tag.exception.mjs';
 import { MediaFileIsNotFoundInRepositoryException } from '../mediafile/mediaFile.exception.mjs';
+import { MediaFileId } from '../mediafile/media-file-id.mjs';
 
 @Injectable()
 export class TagService {
@@ -32,7 +33,7 @@ export class TagService {
     return await this.tagRepository.save(newTag);
   }
 
-  public async assignTag(tagId: TagId, mediaFileId: number) {
+  public async assignTag(tagId: TagId, mediaFileId: MediaFileId) {
     if (!(await this.tagRepository.existsById(tagId)))
       throw new TagIsNotFoundInRepositoryException();
     if (!(await this.mediaFileRepository.exist({ where: { id: mediaFileId } })))
@@ -66,7 +67,7 @@ export class TagService {
   }
 
 
-  public async remove(tagId: TagId, mediaFileId: number) {
+  public async remove(tagId: TagId, mediaFileId: MediaFileId) {
     if (!(await this.tagRepository.existsById(tagId)))
       throw new TagIsNotFoundInRepositoryException();
     if (!(await this.mediaFileRepository.exist({ where: { id: mediaFileId } })))
