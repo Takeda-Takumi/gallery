@@ -5,13 +5,25 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Unique,
+  PrimaryColumn,
 } from 'typeorm';
 import { MediaFileId } from './media-file-id.mjs';
+import { Transform } from 'class-transformer';
 
 @Entity()
 @Unique(['md5'])
 export class MediaFile {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn('varchar', {
+    transformer: {
+      from(value): MediaFileId {
+        if(value === null) return;
+        return new MediaFileId(value)
+      },
+      to(value: MediaFileId): string {
+        return value.id
+      }
+    } 
+  })
   id: MediaFileId;
 
   @Column()
