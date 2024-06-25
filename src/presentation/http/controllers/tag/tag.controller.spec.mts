@@ -9,6 +9,7 @@ import { MediaFile } from '../../../../domain/mediafile/mediaFile.entity.mjs';
 import { createTestConfigurationForSQLite } from '../../../../infrastructure/sql/configuration.database.integration.mjs';
 import { TagTestFixture } from '../../../../domain/tag/tag.test-fixture.mjs';
 import { AppModule } from '../../../../app.module.mjs';
+import { MediaFileTestFixture } from '../../../../domain/mediafile/mediaFile.text-fixture.mjs';
 
 
 describe('TagController', () => {
@@ -18,6 +19,7 @@ describe('TagController', () => {
   let mediaFileRepository: Repository<MediaFile>
   let dataSource: DataSource
   const tagTestFixture: TagTestFixture = new TagTestFixture()
+  const mediaFileTestFixture: MediaFileTestFixture = new MediaFileTestFixture()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -60,7 +62,7 @@ describe('TagController', () => {
     })
 
     test('成功', async () => {
-      const mediaFile = tagTestFixture.mediaFileForTest()
+      const mediaFile = mediaFileTestFixture.mediaFileForTest()
       const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile] })
       await tagRepository.save(tag)
       const response = await request(app.getHttpServer()).get('/tags/' + tag.id.id)
@@ -111,7 +113,7 @@ describe('TagController', () => {
   describe('PUT /tags/{id}/mediafiles/{id}', () => {
     describe('assign', () => {
       test('成功', async () => {
-        const mediaFile = tagTestFixture.mediaFileForTest()
+        const mediaFile = mediaFileTestFixture.mediaFileForTest()
         const tag = tagTestFixture.tagForTest()
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)
@@ -128,7 +130,7 @@ describe('TagController', () => {
   describe('DELETE /tags/{id}/mediafiles/{id}', () => {
     describe('remove', () => {
       test('成功', async () => {
-        const mediaFile = tagTestFixture.mediaFileForTest()
+        const mediaFile = mediaFileTestFixture.mediaFileForTest()
         const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile] })
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)
@@ -147,7 +149,7 @@ describe('TagController', () => {
   describe('DELETE /tags/{id}', () => {
     describe('delete', () => {
       test('成功', async () => {
-        const mediaFile = tagTestFixture.mediaFileForTest()
+        const mediaFile = mediaFileTestFixture.mediaFileForTest()
         const tag = tagTestFixture.tagForTest({ mediaFiles: [mediaFile] })
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)

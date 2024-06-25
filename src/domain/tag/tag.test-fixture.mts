@@ -47,27 +47,4 @@ export class TagTestFixture {
     )
     return tag
   }
-
-
-  mediaFileForTest() {
-    return this.mediaFileForTest1()
-  }
-
-  mediaFileForTest1() {
-    const mediaFile = new MediaFile(
-      1,
-      'md51',
-      'extension1'
-    )
-    return mediaFile
-  }
-
-  mediaFileForTest2() {
-    const mediaFile = new MediaFile(
-      2,
-      'md52',
-      'extension2'
-    )
-    return mediaFile
-  }
 }
