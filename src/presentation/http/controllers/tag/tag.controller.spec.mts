@@ -118,11 +118,11 @@ describe('TagController', () => {
         await mediaFileRepository.save(mediaFile)
         await tagRepository.save(tag)
 
-        const response = await request(app.getHttpServer()).put('/tags/' + tag.id.id + '/mediafiles/' + mediaFile.id)
+        const response = await request(app.getHttpServer()).put('/tags/' + tag.id.id + '/mediafiles/' + mediaFile.id.id)
         expect(response.status).toBe(200)
 
         const updatedtag = await tagRepository.findOne({ relations: { mediaFiles: true }, where: { id: tag.id } })
-        expect(updatedtag.mediaFiles.find((val) => val.id === mediaFile.id)).toBeTruthy()
+        expect(updatedtag.mediaFiles.find((val) => val.id.id === mediaFile.id.id)).toBeTruthy()
       })
     })
   })
@@ -136,7 +136,7 @@ describe('TagController', () => {
         await tagRepository.save(tag)
 
         await expect(mediaFileRepository.exist({ where: { id: mediaFile.id } })).resolves.toBeTruthy()
-        const response = await request(app.getHttpServer()).delete('/tags/' + tag.id.id + '/mediafiles/' + mediaFile.id)
+        const response = await request(app.getHttpServer()).delete('/tags/' + tag.id.id + '/mediafiles/' + mediaFile.id.id)
         expect(response.status).toBe(200)
 
         const updatedtag = await tagRepository.findOne({ relations: { mediaFiles: true }, where: { id: tag.id } })

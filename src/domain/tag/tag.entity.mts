@@ -39,7 +39,7 @@ export class Tag {
   }
 
   public assign(mediaFile: MediaFile) {
-    if (this.mediaFiles.find((value) => value.id === mediaFile.id))
+    if (this.mediaFiles.find((value) => value.id.id === mediaFile.id.id))
       throw new AlreadyAssignedException();
     return new Tag(this.id, this.name, [...this.mediaFiles, mediaFile])
   }

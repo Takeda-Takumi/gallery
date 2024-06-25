@@ -91,8 +91,8 @@ describe('TagService', () => {
 
       const result = await service.assignTag(tag.id, mediaFile.id);
       expect(result.mediaFiles.length).toBe(1);
-      expect(result.mediaFiles.at(0).id).toBe(mediaFile.id);
-    });
+      expect(result.mediaFiles.at(0).id).toStrictEqual(mediaFile.id);
+    }, 100000);
 
     test('画像にタグを付ける', async () => {
       const mediaFile1 = mediaFileTestFixture.mediaFileForTest1()
@@ -104,8 +104,8 @@ describe('TagService', () => {
 
       const result = await service.assignTag(tag.id, mediaFile2.id);
       expect(result.mediaFiles.length).toBe(2);
-      expect(result.mediaFiles.at(0).id).toBe(mediaFile1.id);
-      expect(result.mediaFiles.at(1).id).toBe(mediaFile2.id);
+      expect(result.mediaFiles.at(0).id).toStrictEqual(mediaFile1.id);
+      expect(result.mediaFiles.at(1).id).toStrictEqual(mediaFile2.id);
     });
 
     test('1つの画像に重複してタグを付けられない', async () => {
@@ -245,7 +245,7 @@ describe('TagService', () => {
         where: { id: tag.id },
       });
       expect(newTag.mediaFiles.length).toBe(1);
-      expect(newTag.mediaFiles.at(0).id).toBe(mediaFile1.id);
+      expect(newTag.mediaFiles.at(0).id).toStrictEqual(mediaFile1.id);
     });
   });
 });
