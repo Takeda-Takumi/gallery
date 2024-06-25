@@ -15,6 +15,16 @@ export class MediaFileRepositoryMock {
     this.mediaFileRepositoryMock.push(image);
   }
 
+  async save(image: MediaFile): Promise<MediaFile> {
+    this.mediaFileRepositoryMock.push(
+      {
+        id: new MediaFileId(String(this.mediaFileRepositoryMock.length)),
+        ...image
+      }
+    );
+    return this.mediaFileRepositoryMock.at(-1)
+  }
+
   public async findOne({
     where: { md5 = undefined, id = undefined },
   }: Options): Promise<MediaFile | null> {
