@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
+import { MediaFileId } from './media-file-id.mjs';
 
 type Options = {
   md5?: string;
-  id?: number;
+  id?: MediaFileId;
 };
 
 @Injectable()
@@ -31,20 +32,20 @@ export class MediaFileService {
     return Boolean(await this.findOne({ md5: md5, id: id }));
   }
 
-  public async insert(mediaFile: MediaFile) {
-    if (await this.exists({ md5: mediaFile.md5 })) {
+  public async insert(md5: string, extension: string) {
+    if (await this.exists({ md5: md5 })) {
       throw new Error('duplicate');
     }
 
     const newMediaFile = this.mediaFileRepository.create({
-      md5: mediaFile.md5,
-      extension: mediaFile.extension,
+      md5: md5,
+      extension: extension,
     });
 
     await this.mediaFileRepository.insert(newMediaFile);
   }
 
-  public async remove(id: number) {
+  public async remove(id: MediaFileId) {
     if (!(await this.exists({ id: id }))) throw new Error();
 
     const removed = await this.findOne({ id: id });
