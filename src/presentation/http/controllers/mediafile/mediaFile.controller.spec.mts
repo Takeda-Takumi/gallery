@@ -11,11 +11,13 @@ import { MediaFileRepositoryMock } from '../../../../infrastructure/in-memory/me
 import { FindOneUseCase } from '../../../../application/media-file/find-one.usecase.mjs';
 import { UploadUseCase } from '../../../../application/media-file/upload.usecase.mjs';
 import { RemoveUseCase } from '../../../../application/media-file/remove.usecase.mjs';
+import { MediaFileTestFixture } from '../../../../domain/mediafile/mediaFile.text-fixture.mjs';
 
 describe('MediaFileController', () => {
   let controller: MediaFileController;
   let app: INestApplication;
   let mediaFileRepositoryMock: Repository<MediaFile>;
+  const mediaFileTestFixture: MediaFileTestFixture = new MediaFileTestFixture()
 
   const testFileDir = 'test/files';
   const testFileName = 'image.png';
@@ -73,31 +75,36 @@ describe('MediaFileController', () => {
   });
 
   test('GET /images/id', async () => {
-    const id = 0;
-    const data = { id: id };
+    const data = mediaFileTestFixture.mediaFileForTest()
     await mediaFileRepositoryMock.insert(data);
 
-    const result = await request(app.getHttpServer()).get('/images/' + id);
+    const result = await request(app.getHttpServer()).get('/images/' + data.id.id);
     expect(result.status).toBe(200);
-    expect(result.body).toStrictEqual({ id: String(data.id) });
+    expect(result.body).toStrictEqual(
+      {
+        id: data.id.id, 
+        md5: data.md5
+      }
+    );
   });
 
   test('GET /images/id none', async () => {
-    const data = { id: 0, extension: 'dummy' };
+    const data = mediaFileTestFixture.mediaFileForTest()
     await mediaFileRepositoryMock.insert(data);
 
-    const result = await request(app.getHttpServer()).get('/images/' + 1);
+    const result = await request(app.getHttpServer()).get('/images/' + 'nothing');
     expect(result.status).toBe(200);
     expect(result.body).toBeNull;
   });
 
   test('delete media file', async () => {
-    const id = 0;
-    const data = { id: id, extension: 'png' };
+    // const id = 0;
+    // const data = { id: id, extension: 'png' };
+    const data = mediaFileTestFixture.mediaFileForTest()
     await mediaFileRepositoryMock.insert(data);
 
     const result = await request(app.getHttpServer()).delete(
-      '/images/remove/' + id,
+      '/images/remove/' + data.id.id,
     );
     expect(result.status).toBe(200);
   });

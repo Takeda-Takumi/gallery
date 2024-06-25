@@ -16,9 +16,9 @@ export class UploadUseCase implements UseCase<UploadUseCaseInputDto, UploadUseCa
     const file = input.file
     const mediaFile = await this.mediaFileFactory.parse(file);
 
-    await this.mediaFileService.insert(mediaFile)
+    const InsertedMediaFile = await this.mediaFileService.insert(mediaFile.md5, mediaFile.extension)
 
-    return new UploadUseCaseOutPutDto(mediaFile)
+    return new UploadUseCaseOutPutDto(InsertedMediaFile)
   }
 }
 

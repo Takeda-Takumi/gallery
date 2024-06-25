@@ -8,7 +8,7 @@ export class UploadUseCaseOutPutDto {
   readonly id: string
   readonly md5: string
   constructor(mediaFile: MediaFile) {
-    this.id = String(mediaFile.id)
+    this.id = mediaFile.id.id
     this.md5 = mediaFile.md5
   }
 }
