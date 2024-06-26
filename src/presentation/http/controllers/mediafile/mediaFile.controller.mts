@@ -45,6 +45,6 @@ export class MediaFileController {
 
   @Delete('remove/:id')
   public async remove(@Param('id') id: string): Promise<void> {
-    this.removeUseCase.handle({ id: id })
+    await this.removeUseCase.handle({ id: id })
   }
 }
