@@ -4,6 +4,7 @@
 /uploads
 /db/test.sqlite3
 /db/production.sqlite3
+/public/
 
 # Logs
 logs

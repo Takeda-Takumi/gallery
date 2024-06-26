@@ -7,11 +7,11 @@ import { TagName } from './tagName.mjs';
 import { MediaFile } from '../mediafile/mediaFile.entity.mjs';
 import { createTestConfigurationForSQLite } from '../../infrastructure/sql/configuration.database.integration.mjs';
 import { TagRepositoryToken } from './tag.repository.interface.mjs';
-import { TypeOrmTagRepository } from '../../infrastructure/sql/tag.repository.typeorm.mjs';
 import { TagTestFixture } from './tag.test-fixture.mjs';
 import { AlreadyAssignedException, NotAssignedException, TagAlreadyExistsInRepositoryException, TagIsNotFoundInRepositoryException } from './tag.exception.mjs';
 import { MediaFileIsNotFoundInRepositoryException } from '../mediafile/mediaFile.exception.mjs';
 import { MediaFileTestFixture } from '../mediafile/mediaFile.text-fixture.mjs';
+import { TypeOrmTagRepository } from '../../infrastructure/sql/tag/tag.repository.typeorm.mjs';
 
 describe('TagService', () => {
   let service: TagService;

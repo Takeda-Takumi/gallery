@@ -2,7 +2,6 @@ import { MediaFile } from "../../domain/mediafile/mediaFile.entity.mjs"
 import { Tag } from "../../domain/tag/tag.entity.mjs"
 
 export class FindOneUseCaseInputDto {
-  readonly md5?: string
   readonly id?: string
 }
 

@@ -2,14 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { MediaFileModule } from '../../../domain/mediafile/mediaFile.module.mjs';
-import { createTestConfigurationForSQLite } from '../../../config/configuration.database.integration.mjs';
 import { MediaFile } from '../../../domain/mediafile/mediaFile.entity.mjs';
 import { Tag } from '../../../domain/tag/tag.entity.mjs';
 import { TagService } from '../../../domain/tag/tag.service.mjs';
-import { TypeOrmTagRepository } from '../../../infrastructure/sql/tag.repository.typeorm.mjs';
 import { CreateTagUseCase } from './create-tag.usecase.mjs';
 import { TagRepositoryToken } from '../../../domain/tag/tag.repository.interface.mjs';
 import { TagTestFixture } from '../../../domain/tag/tag.test-fixture.mjs';
+import { TypeOrmTagRepository } from '../../../infrastructure/sql/tag/tag.repository.typeorm.mjs';
+import { createTestConfigurationForSQLite } from '../../../infrastructure/sql/configuration.database.integration.mjs';
 
 
 describe('CreateTagUseCase', () => {
