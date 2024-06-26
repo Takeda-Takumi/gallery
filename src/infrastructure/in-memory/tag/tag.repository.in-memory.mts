@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { Tag } from "../../domain/tag/tag.entity.mjs";
-import { TagId } from "../../domain/tag/tagId.mjs";
-import { TagName } from "../../domain/tag/tagName.mjs";
-import { TagRepository } from "../../domain/tag/tag.repository.interface.mjs";
+import { TagId } from "../../../domain/tag/tagId.mjs";
+import { Tag } from "../../../domain/tag/tag.entity.mjs";
+import { TagName } from "../../../domain/tag/tagName.mjs";
+import { TagRepository } from "../../../domain/tag/tag.repository.interface.mjs";
 
 const tagId = new TagId('1fe5dfe0-8ee4-43ef-919b-c8f6153e7343')
-const tag = new Tag(tagId, new TagName('example'), [])
 
 @Injectable()
 export class InMemoryTagRepository implements TagRepository {

@@ -3,11 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
 import { MediaFileId } from './media-file-id.mjs';
-
-type Options = {
-  md5?: string;
-  id?: MediaFileId;
-};
+import { v4 as uuidv4 } from 'uuid'
 
 @Injectable()
 export class MediaFileService {
@@ -16,28 +12,21 @@ export class MediaFileService {
     private readonly mediaFileRepository: Repository<MediaFile>,
   ) { }
 
-  public async findOne({
-    md5 = undefined,
-    id = undefined,
-  }: Options): Promise<MediaFile> {
-    return await this.mediaFileRepository.findOne({
-      where: { md5: md5, id: id },
-    });
+  public async findOneById(id: MediaFileId) {
+    return await this.mediaFileRepository.findOne({ where: { id: id } })
   }
 
-  public async exists({
-    md5 = undefined,
-    id = undefined,
-  }: Options): Promise<boolean> {
-    return Boolean(await this.findOne({ md5: md5, id: id }));
+  public async findOneByHash(hash: string) {
+    return await this.mediaFileRepository.findOne({ where: { md5: hash } })
   }
 
   public async insert(md5: string, extension: string) {
-    if (await this.exists({ md5: md5 })) {
+    if (await this.mediaFileRepository.exist({ where: { md5: md5 } })) {
       throw new Error('duplicate');
     }
 
     const newMediaFile = this.mediaFileRepository.create({
+      id: new MediaFileId(uuidv4()),
       md5: md5,
       extension: extension,
     });
@@ -46,10 +35,9 @@ export class MediaFileService {
   }
 
   public async remove(id: MediaFileId) {
-    if (!(await this.exists({ id: id }))) throw new Error();
+    if (!(await this.mediaFileRepository.exist({ where: { id: id } }))) throw new Error();
 
-    const removed = await this.findOne({ id: id });
+    const removed = await this.findOneById(id);
     await this.mediaFileRepository.remove(removed);
-    return;
   }
 }

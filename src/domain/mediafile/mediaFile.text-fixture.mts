@@ -50,4 +50,14 @@ export class MediaFileTestFixture {
     )
   }
 
+  imageFileForTest() {
+    const minimum_png = Buffer.from('89504E470D0A1A0A0000000D49484452000000010000000108000000003A7E9B550000000A49444154081D63F80F0001010100365F67800000000049454E44AE426082', 'hex')
+    const hash = 'd9a9186ca60ef28a0f8df9a9bc4d337e'
+
+    return {
+      file: minimum_png,
+      hash: hash
+    }
+  }
+
 }

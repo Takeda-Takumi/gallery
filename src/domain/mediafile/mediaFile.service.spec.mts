@@ -1,25 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { MediaFile } from './mediaFile.entity.mjs';
 import { MediaFileService } from './mediaFile.service.mjs';
-import { MediaFileRepositoryMock } from '../../infrastructure/in-memory/mediaFile.repository.mock.mjs';
 import { MediaFileTestFixture } from './mediaFile.text-fixture.mjs';
 import { MediaFileId } from './media-file-id.mjs';
+import { createTestConfigurationForSQLite } from '../../infrastructure/sql/configuration.database.integration.mjs';
+import { Tag } from '../tag/tag.entity.mjs';
 
 describe('MediafileService', () => {
   let service: MediaFileService;
   let mediaFileRepository: Repository<MediaFile>;
+  let dataSource: DataSource
   const mediaFileTestFixture: MediaFileTestFixture = new MediaFileTestFixture()
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        TypeOrmModule.forRoot(
+          createTestConfigurationForSQLite([MediaFile, Tag])
+        ),
+        TypeOrmModule.forFeature([MediaFile, Tag])
+      ],
       providers: [
         MediaFileService,
-        {
-          provide: getRepositoryToken(MediaFile),
-          useClass: MediaFileRepositoryMock,
-        },
       ],
     }).compile();
 
@@ -27,7 +31,12 @@ describe('MediafileService', () => {
     mediaFileRepository = module.get<Repository<MediaFile>>(
       getRepositoryToken(MediaFile),
     );
+    dataSource = module.get<DataSource>(DataSource)
   });
+
+  afterEach(async () => {
+    await dataSource.dropDatabase()
+  })
 
   it('should be defined', () => {
     expect(service).toBeDefined();
@@ -36,15 +45,16 @@ describe('MediafileService', () => {
   describe('findOne', () => {
     describe('md5', () => {
       test("findOne md5 'test'", async () => {
-        await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-        const result = await service.findOne({ md5: 'test' });
+        const mediaFile = mediaFileTestFixture.mediaFileForTest()
+        await mediaFileRepository.save(mediaFile);
+        const result = await service.findOneByHash(mediaFile.md5);
         expect(result).not.toBeNull();
       });
 
       test('findOne md5 empty', async () => {
         const data = mediaFileTestFixture.mediaFileForTest()
         await mediaFileRepository.insert(data)
-        const result = await service.findOne({ md5: '' });
+        const result = await service.findOneByHash('');
         expect(result).toBeNull();
       });
 
@@ -55,13 +65,13 @@ describe('MediafileService', () => {
 
         await mediaFileRepository.insert(data1);
         await mediaFileRepository.insert(data2);
-        expect(service.findOne({ md5: undefined })).resolves.toStrictEqual(
+        expect(service.findOneByHash(undefined)).resolves.toStrictEqual(
           data1,
         );
       });
 
       test('findOne md5 none', async () => {
-        const result = await service.findOne({ md5: 'test' });
+        const result = await service.findOneByHash('none');
         expect(result).toBeNull();
       });
     });
@@ -74,7 +84,7 @@ describe('MediafileService', () => {
 
         await mediaFileRepository.insert(data1);
         await mediaFileRepository.insert(data2);
-        expect(service.findOne({ id: data2.id })).resolves.toStrictEqual(data2);
+        expect(service.findOneById(data2.id)).resolves.toStrictEqual(data2);
       });
 
       test("id which dosen't exist returns null", async () => {
@@ -84,18 +94,8 @@ describe('MediafileService', () => {
 
         await mediaFileRepository.insert(data1);
         await mediaFileRepository.insert(data2);
-        expect(service.findOne({ id: new MediaFileId("nothing") })).resolves.toBeNull();
+        expect(service.findOneById(new MediaFileId("nothing"))).resolves.toBeNull();
       });
-    });
-
-    test("md5 and id exist but data dosen't exist ", async () => {
-
-      const data1 = mediaFileTestFixture.mediaFileForTest1()
-      const data2 = mediaFileTestFixture.mediaFileForTest2()
-
-      await mediaFileRepository.insert(data1);
-      await mediaFileRepository.insert(data2);
-      expect(service.findOne({ md5: 'test1', id: new MediaFileId("nothing") })).resolves.toBeNull();
     });
   });
 
@@ -103,30 +103,28 @@ describe('MediafileService', () => {
     test('exist md5 "test"', async () => {
       const data = mediaFileTestFixture.mediaFileForTest()
       await mediaFileRepository.insert(data)
-      await expect(service.exists({ md5: data.md5 })).resolves.toBeTruthy();
+      await expect(mediaFileRepository.exist({ where: { md5: data.md5 } })).resolves.toBeTruthy();
     });
 
     test('not exist md5 "notExist"', async () => {
       const data = mediaFileTestFixture.mediaFileForTest()
       await mediaFileRepository.insert(data)
-      await expect(service.exists({ md5: 'nothing' })).resolves.toBeFalsy();
+      await expect(mediaFileRepository.exist({ where: { md5: 'nothing' } })).resolves.toBeFalsy();
     });
   });
   //
   describe('insert', () => {
     test('success insert', async () => {
       const data = mediaFileTestFixture.mediaFileForTest()
-      await expect(service.exists({ md5: data.md5 })).resolves.toBeFalsy();
+      await expect(mediaFileRepository.exist({ where: { md5: data.md5 } })).resolves.toBeFalsy();
       await service.insert(data.md5, data.extension);
     });
 
     test('fail if same md5 exists', async () => {
-      await mediaFileRepository.insert({ md5: 'test', extension: 'png' });
-
       const data = mediaFileTestFixture.mediaFileForTest()
-      await mediaFileRepository.insert(data)
+      await mediaFileRepository.save(data)
 
-      await expect(service.exists({ md5: data.md5 })).resolves.toBeTruthy();
+      await expect(mediaFileRepository.exist({ where: { md5: data.md5 } })).resolves.toBeTruthy();
       await expect(service.insert(data.md5, data.extension)).rejects.toThrow('duplicate');
     });
   });

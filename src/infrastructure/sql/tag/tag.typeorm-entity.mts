@@ -1,4 +1,4 @@
-import { Tag } from "../../domain/tag/tag.entity.mjs";
+import { Tag } from "../../../domain/tag/tag.entity.mjs";
 
 type PropertyNamesExcludeMethods<Base, FilterType> = {
   [Key in keyof Base]: Base[Key] extends FilterType ? never : Key

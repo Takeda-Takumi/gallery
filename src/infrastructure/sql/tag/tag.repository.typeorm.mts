@@ -1,10 +1,10 @@
 import { Repository } from "typeorm";
-import { Tag } from "../../domain/tag/tag.entity.mjs";
-import { TagId } from "../../domain/tag/tagId.mjs";
-import { TagName } from "../../domain/tag/tagName.mjs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { v4 as uuidv4 } from "uuid"
-import { TagRepository } from "../../domain/tag/tag.repository.interface.mjs";
+import { TagRepository } from "../../../domain/tag/tag.repository.interface.mjs";
+import { Tag } from "../../../domain/tag/tag.entity.mjs";
+import { TagId } from "../../../domain/tag/tagId.mjs";
+import { TagName } from "../../../domain/tag/tagName.mjs";
 
 export class TypeOrmTagRepository implements TagRepository {
   constructor(

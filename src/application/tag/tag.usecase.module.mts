@@ -6,9 +6,10 @@ import { CreateTagUseCase } from './create-tag/create-tag.usecase.mjs';
 import { FindTagUseCase } from './find-tag/find-tag.usecase.mjs';
 import { TagModule } from '../../domain/tag/tag.module.mjs';
 import { ChangeTagNameUsecase } from './change-tag-name/change-tag-name.usecase.mjs';
+import { TagRepositoryModule } from '../../infrastructure/sql/tag/tag.repository.module.mjs';
 
 @Module({
-  imports: [TagModule],
+  imports: [TagModule, TagRepositoryModule],
   providers: [DeleteUseCase, RemoveUseCase, AssignUseCase, ChangeTagNameUsecase, CreateTagUseCase, FindTagUseCase],
   exports: [DeleteUseCase, RemoveUseCase, AssignUseCase, ChangeTagNameUsecase, CreateTagUseCase, FindTagUseCase],
 })

@@ -12,9 +12,8 @@ export class FindOneUseCase implements UseCase<FindOneUseCaseInputDto, FindOneUs
   ) { }
 
   async handle(input: FindOneUseCaseInputDto) {
-    const md5 = input.md5
     const id = new MediaFileId(input.id)
-    const mediaFile = await this.mediaFileService.findOne({ id: id, md5: md5 })
+    const mediaFile = await this.mediaFileService.findOneById(id)
     if (mediaFile == null) return null
     return new FindOneUseCaseOutputDto(mediaFile)
   }
